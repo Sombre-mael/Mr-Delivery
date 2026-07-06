@@ -57,6 +57,7 @@ export const navLinks = [
   { label: "Services", href: "#services" },
   { label: "Nos Packs", href: "#packs" },
   { label: "Commander", href: "#commande" },
+  { label: "Suivi", href: "#suivi" },
   { label: "Avis", href: "#avis" },
   { label: "Reglement", href: "#reglement" },
   { label: "Contact", href: "#contact" },

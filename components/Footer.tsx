@@ -52,6 +52,11 @@ export function Footer() {
             </li>
             <li>WhatsApp Business : {DISPLAY_PHONE_NUMBER}</li>
             <li>Disponible 7j/7 des 7h00</li>
+            <li>
+              <a href="/operator" className="font-black text-gold transition hover:text-white">
+                Espace equipe
+              </a>
+            </li>
           </ul>
         </div>
       </div>

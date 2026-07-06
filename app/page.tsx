@@ -9,6 +9,7 @@ import { Packs } from "@/components/Packs";
 import { Regulations } from "@/components/Regulations";
 import { Reviews } from "@/components/Reviews";
 import { Services } from "@/components/Services";
+import { TrackingSection } from "@/components/TrackingSection";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 export default function Home() {
@@ -20,6 +21,7 @@ export default function Home() {
       <Services />
       <Packs />
       <OrderComposer />
+      <TrackingSection />
       <HowItWorks />
       <Regulations />
       <Reviews />

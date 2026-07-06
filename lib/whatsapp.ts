@@ -2,6 +2,27 @@ export const WHATSAPP_NUMBER = "243819428849";
 export const DISPLAY_PHONE_NUMBER = "+243 819 428 849";
 export const PHONE_LINK = "tel:+243819428849";
 
+export type DeliveryStatus =
+  | "payment_pending"
+  | "payment_confirmed"
+  | "picked_up"
+  | "in_delivery"
+  | "delivered"
+  | "issue";
+
+export type StatusMessageInput = {
+  customerName?: string;
+  customerPhone?: string;
+  invoiceNumber?: string;
+  packName?: string;
+  amount?: string;
+  paymentStatus?: string;
+  pickup?: string;
+  destination?: string;
+  notes?: string;
+  status: DeliveryStatus;
+};
+
 export type OrderMessageInput = {
   name?: string;
   phone?: string;
@@ -23,8 +44,39 @@ export type ReviewMessageInput = {
   comment?: string;
 };
 
+export const deliveryStatusLabels: Record<DeliveryStatus, string> = {
+  payment_pending: "Paiement attendu",
+  payment_confirmed: "Paiement confirme",
+  picked_up: "Colis recupere",
+  in_delivery: "En cours de livraison",
+  delivered: "Livre",
+  issue: "Probleme ou retard",
+};
+
 export function generateWhatsAppLink(message: string) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+
+export function normalizeWhatsAppPhone(phone?: string) {
+  const digits = (phone || "").replace(/\D/g, "");
+
+  if (!digits) {
+    return WHATSAPP_NUMBER;
+  }
+
+  if (digits.startsWith("0")) {
+    return `243${digits.slice(1)}`;
+  }
+
+  if (digits.startsWith("243")) {
+    return digits;
+  }
+
+  return digits;
+}
+
+export function generateClientWhatsAppLink(phone: string | undefined, message: string) {
+  return `https://wa.me/${normalizeWhatsAppPhone(phone)}?text=${encodeURIComponent(message)}`;
 }
 
 export function generatePackMessage(packName: string) {
@@ -93,4 +145,44 @@ export function generateReviewMessage(review: ReviewMessageInput) {
 
 export function generateMapsLink(latitude: number, longitude: number) {
   return `https://www.google.com/maps?q=${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+}
+
+export function generateStatusMessage(input: StatusMessageInput) {
+  const customer = input.customerName || "Cher client";
+  const invoice = input.invoiceNumber ? `Facture : ${input.invoiceNumber}` : "Facture : A confirmer";
+  const pack = input.packName ? `Pack : ${input.packName}` : "Pack : A confirmer";
+  const route = `Trajet : ${input.pickup || "Ramassage a confirmer"} -> ${input.destination || "Destination a confirmer"}`;
+  const amount = input.amount ? `Montant : ${input.amount}` : "Montant : A confirmer";
+  const payment = input.paymentStatus ? `Paiement : ${input.paymentStatus}` : "Paiement : A confirmer";
+  const notes = input.notes ? `Note : ${input.notes}` : "";
+
+  const statusMessage: Record<DeliveryStatus, string> = {
+    payment_pending:
+      "Votre demande est prete. Merci d'effectuer le paiement pour confirmer la reservation de votre livraison.",
+    payment_confirmed:
+      "Votre paiement est confirme. Mr. Delivery organise maintenant la prise en charge de votre colis.",
+    picked_up: "Votre colis a ete recupere. Nous vous tenons informe de la suite de la livraison.",
+    in_delivery: "Votre colis est actuellement en cours de livraison.",
+    delivered: "Votre colis a ete livre. Merci d'avoir choisi Mr. Delivery.",
+    issue:
+      "Nous avons une information importante concernant votre livraison. Notre equipe vous contacte pour clarifier la situation.",
+  };
+
+  return [
+    `MISE A JOUR MR. DELIVERY - ${deliveryStatusLabels[input.status]}`,
+    "",
+    `Bonjour ${customer},`,
+    statusMessage[input.status],
+    "",
+    invoice,
+    pack,
+    amount,
+    payment,
+    route,
+    notes,
+    "",
+    "Mr. Delivery - Votre temps est precieux, nous le respectons.",
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
