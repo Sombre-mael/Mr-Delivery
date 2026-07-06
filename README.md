@@ -79,15 +79,15 @@ Copy-Item .env.example .env.local
 Mettre a jour:
 
 ```txt
-NEXT_PUBLIC_SITE_URL=https://votre-domaine.com
-NEXT_PUBLIC_APP_URL=https://votre-domaine.com
+NEXT_PUBLIC_SITE_URL=https://mr-delivery-nine.vercel.app
+NEXT_PUBLIC_APP_URL=https://mr-delivery-nine.vercel.app
 DATABASE_URL=postgresql://neondb_owner:...@ep-...pooler.../neondb?sslmode=require
 ADMIN_PASSWORD_HASH=generate-with-pnpm-hash-admin
 SESSION_SECRET=long-secret-aleatoire
 ```
 
 - `NEXT_PUBLIC_SITE_URL` sert aux images Open Graph et Twitter Card.
-- `NEXT_PUBLIC_APP_URL` sert aux liens QR de suivi.
+- `NEXT_PUBLIC_APP_URL` sert de fallback pour les liens QR de suivi; en production, le domaine de la requete est detecte automatiquement.
 - `DATABASE_URL` est la connection string Neon.
 - `ADMIN_PASSWORD_HASH` protege `/operator` sans stocker le mot de passe en clair.
 - `SESSION_SECRET` signe le cookie de session operateur.

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { OperatorConsole } from "@/components/OperatorConsole";
 import { isOperatorAuthenticated } from "@/lib/operator-auth";
@@ -17,13 +18,26 @@ type OperatorPageProps = {
   searchParams?: Promise<{ order?: string }>;
 };
 
+async function getAppUrl() {
+  const headerStore = await headers();
+  const forwardedHost = headerStore.get("x-forwarded-host");
+  const host = forwardedHost || headerStore.get("host");
+  const protocol = headerStore.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
+
+  if (host) {
+    return `${protocol}://${host}`;
+  }
+
+  return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+}
+
 export default async function OperatorPage({ searchParams }: OperatorPageProps) {
   if (!(await isOperatorAuthenticated())) {
     redirect("/operator/login");
   }
 
   const params = await searchParams;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = await getAppUrl();
 
   try {
     const orders = await listOrders();
