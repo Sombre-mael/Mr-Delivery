@@ -21,13 +21,23 @@ export function Hero() {
         return;
       }
 
-      const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
+      const isMobile = window.matchMedia("(max-width: 640px)").matches;
+      const timeline = gsap.timeline({ defaults: { ease: isMobile ? "power2.out" : "power3.out" } });
       timeline
-        .from(".hero-copy > *", { autoAlpha: 0, y: 24, duration: 0.72, stagger: 0.08 })
-        .from(".hero-visual", { autoAlpha: 0, scale: 0.96, duration: 0.8 }, "-=0.46")
-        .from(".hero-delivery-motion", { autoAlpha: 0, y: 18, duration: 0.55 }, "-=0.38")
-        .from(".hero-stat", { autoAlpha: 0, y: 18, duration: 0.48, stagger: 0.06 }, "-=0.42")
+        .from(".hero-copy > *", { autoAlpha: 0, y: isMobile ? 12 : 24, duration: isMobile ? 0.82 : 0.72, stagger: isMobile ? 0.055 : 0.08 })
+        .from(".hero-visual", { autoAlpha: 0, scale: isMobile ? 0.985 : 0.96, y: isMobile ? 10 : 0, duration: isMobile ? 0.82 : 0.8 }, "-=0.46")
+        .from(".hero-delivery-motion", { autoAlpha: 0, y: isMobile ? 10 : 18, duration: isMobile ? 0.72 : 0.55 }, "-=0.38")
+        .from(".hero-stat", { autoAlpha: 0, y: isMobile ? 10 : 18, duration: isMobile ? 0.55 : 0.48, stagger: isMobile ? 0.045 : 0.06 }, "-=0.42")
         .fromTo(".hero-speed-line", { scaleX: 0 }, { scaleX: 1, duration: 0.45, stagger: 0.08, transformOrigin: "left" }, "-=0.5");
+
+      gsap.to(".hero-mobile-ping", {
+        scale: 2.2,
+        autoAlpha: 0,
+        duration: 1.45,
+        repeat: -1,
+        repeatDelay: 0.8,
+        ease: "power2.out",
+      });
     },
     { scope },
   );
@@ -99,6 +109,7 @@ export function Hero() {
               className="aspect-[4/3] w-full object-cover"
             />
             <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3 rounded-xl bg-white/92 p-3 shadow-soft backdrop-blur">
+              <span className="hero-mobile-ping absolute left-6 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full bg-gold/40" />
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gold text-ink">
                 <ShieldCheck size={22} />
               </div>

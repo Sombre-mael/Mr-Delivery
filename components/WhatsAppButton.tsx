@@ -18,10 +18,10 @@ export function WhatsAppButton() {
       return;
     }
 
-    const timeline = gsap.timeline({ repeat: -1, repeatDelay: 0.25 });
+    const timeline = gsap.timeline({ repeat: -1, repeatDelay: 0.55 });
     timeline
-      .to(buttonRef.current, { scale: 1.07, duration: 0.55, ease: "sine.inOut" })
-      .to(buttonRef.current, { scale: 1, duration: 0.55, ease: "sine.inOut" });
+      .to(buttonRef.current, { scale: 1.045, boxShadow: "0 0 0 14px rgba(37, 211, 102, 0.12)", duration: 0.72, ease: "sine.inOut" })
+      .to(buttonRef.current, { scale: 1, boxShadow: "0 0 0 8px rgba(37, 211, 102, 0.08)", duration: 0.72, ease: "sine.inOut" });
   });
 
   return (

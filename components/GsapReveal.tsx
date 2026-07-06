@@ -45,21 +45,22 @@ export function GsapReveal({
         return;
       }
 
+      const isMobile = window.matchMedia("(max-width: 640px)").matches;
       const animation = gsap.fromTo(
         targets,
         {
           opacity,
-          y,
-          scale: 0.97,
+          y: isMobile ? Math.min(y, 14) : y,
+          scale: isMobile ? 0.985 : 0.97,
         },
         {
           opacity: 1,
           y: 0,
           scale: 1,
-          duration: 0.78,
-          ease: "power3.out",
+          duration: isMobile ? 0.92 : 0.78,
+          ease: isMobile ? "power2.out" : "power3.out",
           delay,
-          stagger: selector ? stagger : 0,
+          stagger: selector ? (isMobile ? Math.min(stagger, 0.055) : stagger) : 0,
           immediateRender: false,
           clearProps: "opacity,transform",
           scrollTrigger: {

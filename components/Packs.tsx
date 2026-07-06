@@ -21,6 +21,10 @@ export function Packs() {
         return;
       }
 
+      if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        return;
+      }
+
       const cards = gsap.utils.toArray<HTMLElement>(".pack-card");
       const cleanups = cards.map((card) => {
         const enter = () => gsap.to(card, { y: -10, scale: 1.015, duration: 0.25, ease: "power2.out" });

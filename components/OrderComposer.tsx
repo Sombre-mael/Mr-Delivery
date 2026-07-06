@@ -76,11 +76,13 @@ export function OrderComposer() {
         return;
       }
 
+      const isMobile = window.matchMedia("(max-width: 640px)").matches;
+
       gsap.from(".assistant-shell", {
         autoAlpha: 0,
-        y: 36,
-        duration: 0.75,
-        ease: "power3.out",
+        y: isMobile ? 16 : 36,
+        duration: isMobile ? 0.95 : 0.75,
+        ease: isMobile ? "power2.out" : "power3.out",
         scrollTrigger: {
           trigger: scope.current,
           start: "top 78%",
@@ -99,10 +101,12 @@ export function OrderComposer() {
         return;
       }
 
+      const isMobile = window.matchMedia("(max-width: 640px)").matches;
+
       gsap.fromTo(
         ".assistant-step",
-        { autoAlpha: 0, x: 22 },
-        { autoAlpha: 1, x: 0, duration: 0.36, ease: "power2.out" },
+        { autoAlpha: 0, x: isMobile ? 8 : 22, y: isMobile ? 6 : 0 },
+        { autoAlpha: 1, x: 0, y: 0, duration: isMobile ? 0.48 : 0.36, ease: "power2.out" },
       );
     },
     { scope, dependencies: [step] },

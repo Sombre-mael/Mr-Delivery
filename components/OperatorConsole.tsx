@@ -1,7 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, ExternalLink, FileText, LogOut, MessageCircle, Printer, QrCode, RefreshCw } from "lucide-react";
+import {
+  ArrowRight,
+  BarChart3,
+  Clock3,
+  ExternalLink,
+  FileText,
+  LogOut,
+  MessageCircle,
+  PackageCheck,
+  Printer,
+  QrCode,
+  RefreshCw,
+  Search,
+  Truck,
+} from "lucide-react";
 import QRCode from "qrcode";
 import { createOrderAction, logoutAction, updateOrderAction } from "@/app/operator/actions";
 import { assistantNeeds, packageTypeOptions, packs, urgencyOptions } from "@/lib/data";
@@ -16,6 +30,14 @@ import {
 } from "@/lib/whatsapp";
 
 const statusOptions = Object.entries(deliveryStatusLabels) as Array<[DeliveryStatus, string]>;
+const historyFilters: Array<{ label: string; value: "all" | DeliveryStatus }> = [
+  { label: "Toutes", value: "all" },
+  { label: "Paiement", value: "payment_pending" },
+  { label: "Recupere", value: "picked_up" },
+  { label: "En livraison", value: "in_delivery" },
+  { label: "Livre", value: "delivered" },
+  { label: "Probleme", value: "issue" },
+];
 
 type OperatorForm = StatusMessageInput & {
   service: string;
@@ -102,6 +124,8 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
   const activeOrder = orders.find((order) => order.id === activeOrderId) || null;
   const [form, setForm] = useState<OperatorForm>(activeOrder ? orderToForm(activeOrder) : emptyOrder);
   const [qrDataUrl, setQrDataUrl] = useState("");
+  const [historyQuery, setHistoryQuery] = useState("");
+  const [historyStatus, setHistoryStatus] = useState<"all" | DeliveryStatus>("all");
 
   const trackingCode = activeOrder?.trackingCode || "A creer";
   const trackingUrl = activeOrder ? `${appUrl.replace(/\/$/, "")}/track/${activeOrder.trackingCode}` : `${appUrl.replace(/\/$/, "")}/track`;
@@ -111,6 +135,59 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
     [form.customerPhone, statusMessage, trackingUrl],
   );
   const invoicePayload = useMemo(() => buildInvoicePayload(form, trackingCode, trackingUrl), [form, trackingCode, trackingUrl]);
+  const dashboardStats = useMemo(
+    () => [
+      {
+        label: "Commandes",
+        value: orders.length,
+        detail: "Total enregistre",
+        icon: BarChart3,
+        tone: "bg-ink text-white",
+      },
+      {
+        label: "Paiement attendu",
+        value: orders.filter((order) => order.status === "payment_pending").length,
+        detail: "A confirmer",
+        icon: Clock3,
+        tone: "bg-gold text-ink",
+      },
+      {
+        label: "En livraison",
+        value: orders.filter((order) => order.status === "in_delivery").length,
+        detail: "Courses actives",
+        icon: Truck,
+        tone: "bg-ink text-gold",
+      },
+      {
+        label: "Livrees",
+        value: orders.filter((order) => order.status === "delivered").length,
+        detail: "Terminees",
+        icon: PackageCheck,
+        tone: "bg-white text-ink",
+      },
+    ],
+    [orders],
+  );
+  const filteredOrders = useMemo(() => {
+    const query = historyQuery.trim().toLowerCase();
+
+    return orders.filter((order) => {
+      const matchesStatus = historyStatus === "all" || order.status === historyStatus;
+      const haystack = [
+        order.customerName,
+        order.customerPhone,
+        order.trackingCode,
+        order.invoiceNumber,
+        order.packName,
+        order.paymentStatus,
+        deliveryStatusLabels[order.status],
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return matchesStatus && (!query || haystack.includes(query));
+    });
+  }, [historyQuery, historyStatus, orders]);
 
   useEffect(() => {
     if (activeOrder) {
@@ -190,6 +267,27 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
               </button>
             </form>
           </div>
+        </div>
+
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {dashboardStats.map((stat) => {
+            const Icon = stat.icon;
+
+            return (
+              <article key={stat.label} className="rounded-2xl border border-ink/8 bg-white p-4 shadow-soft">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.14em] text-neutral-500">{stat.label}</p>
+                    <p className="mt-2 text-3xl font-black text-ink">{stat.value}</p>
+                    <p className="mt-1 text-sm font-semibold text-neutral-500">{stat.detail}</p>
+                  </div>
+                  <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${stat.tone}`}>
+                    <Icon size={22} />
+                  </span>
+                </div>
+              </article>
+            );
+          })}
         </div>
 
         <div className="mt-8 grid gap-6 xl:grid-cols-[0.38fr_0.62fr]">
@@ -558,12 +656,41 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
               <p className="text-sm font-black uppercase tracking-[0.16em] text-gold">Historique</p>
               <h2 className="mt-1 text-2xl font-black">Toutes les commandes passees</h2>
             </div>
-            <p className="text-sm font-bold text-neutral-500">{orders.length} commande(s) enregistree(s)</p>
+            <p className="text-sm font-bold text-neutral-500">
+              {filteredOrders.length} / {orders.length} commande(s)
+            </p>
           </div>
 
-          {orders.length ? (
-            <div className="mt-5 overflow-x-auto">
-              <table className="min-w-[920px] w-full border-collapse text-left text-sm">
+          <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+            <label className="relative block">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
+              <input
+                value={historyQuery}
+                onChange={(event) => setHistoryQuery(event.target.value)}
+                placeholder="Rechercher nom, telephone, code, pack..."
+                className="min-h-12 w-full rounded-full border border-ink/10 bg-[#fffdf7] pl-11 pr-4 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
+              />
+            </label>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {historyFilters.map((filter) => (
+                <button
+                  key={filter.value}
+                  type="button"
+                  onClick={() => setHistoryStatus(filter.value)}
+                  className={`shrink-0 rounded-full px-4 py-2 text-xs font-black transition ${
+                    historyStatus === filter.value ? "bg-ink text-white" : "border border-ink/10 bg-white text-ink hover:border-gold"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {filteredOrders.length ? (
+            <>
+              <div className="mt-5 hidden overflow-x-auto lg:block">
+                <table className="min-w-[920px] w-full border-collapse text-left text-sm">
                 <thead>
                   <tr className="border-b border-ink/10 text-xs font-black uppercase tracking-[0.12em] text-neutral-500">
                     <th className="py-3 pr-4">Client</th>
@@ -577,7 +704,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map((order) => (
+                  {filteredOrders.map((order) => (
                     <tr key={order.id} className="border-b border-ink/6 last:border-0">
                       <td className="py-4 pr-4 font-black">{order.customerName || "A confirmer"}</td>
                       <td className="py-4 pr-4 font-bold text-neutral-600">{order.customerPhone || "A confirmer"}</td>
@@ -603,10 +730,52 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+
+              <div className="mt-5 grid gap-3 lg:hidden">
+                {filteredOrders.map((order) => (
+                  <article key={order.id} className="rounded-xl border border-ink/10 bg-[#fffdf7] p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-base font-black">{order.customerName || "A confirmer"}</p>
+                        <p className="mt-1 text-xs font-bold text-neutral-500">{order.customerPhone || "Telephone a confirmer"}</p>
+                      </div>
+                      <span className="rounded-full bg-ink px-3 py-1 text-[0.68rem] font-black text-white">
+                        {deliveryStatusLabels[order.status]}
+                      </span>
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+                      <p>
+                        <span className="block font-black uppercase text-neutral-500">Code</span>
+                        <span className="mt-1 block font-black text-gold">{order.trackingCode}</span>
+                      </p>
+                      <p>
+                        <span className="block font-black uppercase text-neutral-500">Pack</span>
+                        <span className="mt-1 block font-bold text-neutral-700">{order.packName || "A confirmer"}</span>
+                      </p>
+                      <p>
+                        <span className="block font-black uppercase text-neutral-500">Paiement</span>
+                        <span className="mt-1 block font-bold text-neutral-700">{order.paymentStatus || "A confirmer"}</span>
+                      </p>
+                      <p>
+                        <span className="block font-black uppercase text-neutral-500">Montant</span>
+                        <span className="mt-1 block font-bold text-neutral-700">{order.amount || "A confirmer"}</span>
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveOrderId(order.id)}
+                      className="mt-4 inline-flex w-full justify-center rounded-full bg-gold px-4 py-3 text-xs font-black text-ink transition hover:bg-ink hover:text-white"
+                    >
+                      Ouvrir cette commande
+                    </button>
+                  </article>
+                ))}
+              </div>
+            </>
           ) : (
             <div className="mt-5 rounded-xl border border-dashed border-ink/15 p-5 text-sm leading-6 text-neutral-600">
-              Aucune commande enregistree pour le moment.
+              Aucune commande ne correspond a cette recherche.
             </div>
           )}
         </section>

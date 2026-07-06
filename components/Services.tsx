@@ -35,6 +35,10 @@ export function Services() {
         return;
       }
 
+      if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        return;
+      }
+
       const cards = gsap.utils.toArray<HTMLElement>(".service-card");
       const cleanups = cards.map((card) => {
         const icon = card.querySelector(".service-icon");

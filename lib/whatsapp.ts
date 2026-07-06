@@ -44,6 +44,14 @@ export type ReviewMessageInput = {
   comment?: string;
 };
 
+export type TrackingSupportMessageInput = {
+  trackingCode?: string;
+  invoiceNumber?: string;
+  statusLabel?: string;
+  pickup?: string;
+  destination?: string;
+};
+
 export const deliveryStatusLabels: Record<DeliveryStatus, string> = {
   payment_pending: "Paiement attendu",
   payment_confirmed: "Paiement confirme",
@@ -140,6 +148,22 @@ export function generateReviewMessage(review: ReviewMessageInput) {
     `Commentaire : ${review.comment || "Aucun commentaire ajoute"}`,
     "",
     "Merci pour votre service.",
+  ].join("\n");
+}
+
+export function generateTrackingSupportMessage(input: TrackingSupportMessageInput) {
+  return [
+    "ASSISTANCE SUIVI MR. DELIVERY",
+    "",
+    "Bonjour Mr. Delivery, j'ai besoin d'aide concernant mon colis.",
+    "",
+    `Code suivi : ${input.trackingCode || "A preciser"}`,
+    `Facture : ${input.invoiceNumber || "A preciser"}`,
+    `Statut actuel : ${input.statusLabel || "A verifier"}`,
+    `Ramassage : ${input.pickup || "A confirmer"}`,
+    `Livraison : ${input.destination || "A confirmer"}`,
+    "",
+    "Merci de me donner une mise a jour.",
   ].join("\n");
 }
 

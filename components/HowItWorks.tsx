@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, FileText, MessageCircle, UserCheck } from "lucide-react";
+import { BadgeCheck, FileText, MessageCircle, Package, Truck, UserCheck } from "lucide-react";
 import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -36,6 +36,7 @@ export function HowItWorks() {
         return;
       }
 
+      const isMobile = window.matchMedia("(max-width: 640px)").matches;
       const timeline = gsap.timeline({
         scrollTrigger: {
           trigger: scope.current,
@@ -45,13 +46,32 @@ export function HowItWorks() {
       });
 
       timeline
+        .from(".process-driver", {
+          autoAlpha: 0,
+          x: isMobile ? -16 : -28,
+          duration: 0.45,
+          ease: "power2.out",
+        })
+        .to(".process-track-fill", {
+          scaleX: 1,
+          transformOrigin: "left center",
+          duration: isMobile ? 0.9 : 0.7,
+          ease: "power2.inOut",
+        }, "-=0.18")
+        .to(".process-driver", {
+          x: isMobile ? "74vw" : 320,
+          y: isMobile ? 0 : -2,
+          duration: isMobile ? 1.15 : 0.9,
+          ease: "power1.inOut",
+        }, "-=0.78")
         .from(".process-card", {
           autoAlpha: 0,
-          y: 28,
-          duration: 0.62,
-          ease: "power3.out",
-          stagger: 0.12,
-        })
+          y: isMobile ? 14 : 28,
+          scale: isMobile ? 0.99 : 1,
+          duration: isMobile ? 0.72 : 0.62,
+          ease: isMobile ? "power2.out" : "power3.out",
+          stagger: isMobile ? 0.08 : 0.12,
+        }, "-=0.35")
         .from(".process-line", { scaleX: 0, transformOrigin: "left", duration: 0.45, stagger: 0.12 }, "-=0.36");
     },
     { scope },
@@ -72,6 +92,15 @@ export function HowItWorks() {
 
         <div className="mt-8 max-w-3xl">
           <DeliveryMotion />
+        </div>
+
+        <div className="relative mt-8 h-16 overflow-hidden rounded-2xl border border-white/10 bg-white/6 px-5 lg:hidden">
+          <div className="absolute left-5 right-5 top-1/2 h-1 -translate-y-1/2 rounded-full bg-white/12" />
+          <div className="process-track-fill absolute left-5 right-5 top-1/2 h-1 -translate-y-1/2 scale-x-[0.08] rounded-full bg-gold" />
+          <div className="process-driver absolute left-5 top-1/2 flex -translate-y-1/2 items-center gap-2 rounded-full bg-gold px-3 py-2 text-ink shadow-gold">
+            <Truck size={18} />
+            <Package size={15} />
+          </div>
         </div>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-4">
