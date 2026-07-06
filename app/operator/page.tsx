@@ -23,8 +23,35 @@ export default async function OperatorPage({ searchParams }: OperatorPageProps) 
   }
 
   const params = await searchParams;
-  const orders = await listOrders();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-  return <OperatorConsole orders={orders} selectedTrackingCode={params?.order} appUrl={appUrl} />;
+  try {
+    const orders = await listOrders();
+
+    return <OperatorConsole orders={orders} selectedTrackingCode={params?.order} appUrl={appUrl} />;
+  } catch (error) {
+    console.error("Operator database configuration error", error);
+
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#fffdf7] px-4 py-12 text-ink">
+        <section className="w-full max-w-xl rounded-2xl border border-ink/10 bg-white p-6 shadow-soft sm:p-8">
+          <p className="text-sm font-black uppercase tracking-[0.16em] text-gold">Configuration Neon</p>
+          <h1 className="mt-2 text-3xl font-black">Connexion base de donnees impossible</h1>
+          <p className="mt-4 text-sm leading-7 text-neutral-600">
+            Verifiez la variable `DATABASE_URL` dans Vercel. Elle doit contenir la vraie connection string Neon, pas le
+            modele avec `USER`, `PASSWORD` ou `HOST`.
+          </p>
+          <div className="mt-5 rounded-lg bg-ink p-4 text-sm font-semibold leading-6 text-white/75">
+            Exemple attendu: `postgresql://neondb_owner:mot-de-passe@ep-...pooler.../neondb?sslmode=require`
+          </div>
+          <a
+            href="/"
+            className="mt-6 inline-flex rounded-full bg-gold px-6 py-3 text-sm font-black text-ink transition hover:bg-ink hover:text-white"
+          >
+            Retour au site
+          </a>
+        </section>
+      </main>
+    );
+  }
 }

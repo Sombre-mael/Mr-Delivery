@@ -81,7 +81,7 @@ Mettre a jour:
 ```txt
 NEXT_PUBLIC_SITE_URL=https://votre-domaine.com
 NEXT_PUBLIC_APP_URL=https://votre-domaine.com
-DATABASE_URL=postgresql://...
+DATABASE_URL=postgresql://neondb_owner:...@ep-...pooler.../neondb?sslmode=require
 ADMIN_PASSWORD_HASH=generate-with-pnpm-hash-admin
 SESSION_SECRET=long-secret-aleatoire
 ```
@@ -115,6 +115,9 @@ SESSION_SECRET
 NEXT_PUBLIC_APP_URL
 NEXT_PUBLIC_SITE_URL
 ```
+
+Pour `DATABASE_URL`, copier la connection string complete depuis Neon > Connect > Connection string. Elle doit contenir
+le vrai domaine Neon `ep-...neon.tech`; ne pas garder `USER`, `PASSWORD` ou `HOST`.
 
 Puis pousser sur GitHub:
 
