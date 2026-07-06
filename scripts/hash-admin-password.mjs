@@ -21,4 +21,7 @@ const key = scryptSync(password, salt, options.keyLength, {
   p: options.p,
 }).toString("hex");
 
-console.log(`ADMIN_PASSWORD_HASH=scrypt$${options.N}$${options.r}$${options.p}$${salt}$${key}`);
+const hash = `scrypt$${options.N}$${options.r}$${options.p}$${salt}$${key}`;
+
+console.log("Copy this value into Vercel as ADMIN_PASSWORD_HASH:");
+console.log(hash);

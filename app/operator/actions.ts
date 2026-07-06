@@ -54,9 +54,14 @@ async function requireOperator() {
 export async function loginAction(formData: FormData) {
   const password = readText(formData, "password");
 
-  if (verifyAdminPassword(password)) {
-    await createOperatorSession();
-    redirect("/operator");
+  try {
+    if (verifyAdminPassword(password)) {
+      await createOperatorSession();
+      redirect("/operator");
+    }
+  } catch (error) {
+    console.error("Operator auth configuration error", error);
+    redirect("/operator/login?error=config");
   }
 
   redirect("/operator/login?error=1");

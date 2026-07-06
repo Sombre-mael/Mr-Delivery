@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 
 const COOKIE_NAME = "mrd_operator_session";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const SCRYPT_MIN_N = 1024;
+const SCRYPT_MAX_N = 1048576;
 
 function getSessionSecret() {
   const secret = process.env.SESSION_SECRET;
@@ -36,11 +38,27 @@ function verifyScryptHash(password: string, storedHash: string) {
     throw new Error("ADMIN_PASSWORD_HASH is invalid. Generate it with `pnpm hash:admin \"your-password\"`.");
   }
 
+  const n = Number(nValue);
+  const r = Number(rValue);
+  const p = Number(pValue);
+
+  if (
+    !Number.isInteger(n) ||
+    !Number.isInteger(r) ||
+    !Number.isInteger(p) ||
+    n < SCRYPT_MIN_N ||
+    n > SCRYPT_MAX_N ||
+    r < 1 ||
+    p < 1
+  ) {
+    throw new Error("ADMIN_PASSWORD_HASH parameters are invalid. Generate it with `pnpm hash:admin \"your-password\"`.");
+  }
+
   const expected = Buffer.from(key, "hex");
   const actual = scryptSync(password, salt, expected.length, {
-    N: Number(nValue),
-    r: Number(rValue),
-    p: Number(pValue),
+    N: n,
+    r,
+    p,
   });
 
   if (actual.length !== expected.length) {

@@ -82,7 +82,7 @@ Mettre a jour:
 NEXT_PUBLIC_SITE_URL=https://votre-domaine.com
 NEXT_PUBLIC_APP_URL=https://votre-domaine.com
 DATABASE_URL=postgresql://...
-ADMIN_PASSWORD_HASH=scrypt$...
+ADMIN_PASSWORD_HASH=generate-with-pnpm-hash-admin
 SESSION_SECRET=long-secret-aleatoire
 ```
 
@@ -98,8 +98,11 @@ Generer le hash du mot de passe equipe:
 pnpm hash:admin "votre-mot-de-passe"
 ```
 
-Copier ensuite la valeur `ADMIN_PASSWORD_HASH=...` dans les variables d'environnement Vercel.
+Copier ensuite la valeur affichee par le script dans les variables d'environnement Vercel.
 En local uniquement, `ADMIN_PASSWORD` reste accepte comme fallback de developpement.
+
+Dans Vercel, creer une variable nommee `ADMIN_PASSWORD_HASH` et coller uniquement la valeur qui commence par
+`scrypt$...`. Ne pas coller `ADMIN_PASSWORD_HASH=` dans le champ valeur.
 
 ## Deploiement Vercel
 
