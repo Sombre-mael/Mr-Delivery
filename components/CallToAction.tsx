@@ -1,9 +1,9 @@
 "use client";
 
-import { ArrowRight, Check, Phone } from "lucide-react";
+import { ArrowRight, Check, Mail, Phone } from "lucide-react";
 import { GsapReveal } from "@/components/GsapReveal";
 import { trustArguments } from "@/lib/data";
-import { DISPLAY_PHONE_NUMBER, PHONE_LINK } from "@/lib/whatsapp";
+import { DISPLAY_PHONE_NUMBER, EMAIL_ADDRESS, EMAIL_LINK, PHONE_LINK } from "@/lib/whatsapp";
 
 export function CallToAction() {
   return (
@@ -11,11 +11,11 @@ export function CallToAction() {
       <GsapReveal className="mx-auto max-w-7xl">
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div>
-            <h2 className="text-3xl font-black leading-tight sm:text-4xl">Pret a envoyer votre colis ?</h2>
+            <h2 className="text-3xl font-black leading-tight sm:text-4xl">Prêt à envoyer votre colis ?</h2>
             <p className="mt-4 max-w-2xl text-base font-semibold leading-7 text-ink/76">
               Commandez en quelques secondes via WhatsApp. Un livreur Mr. Delivery s'occupe du reste.
             </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <a
                 href="#commande"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-sm font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-white hover:text-ink"
@@ -29,6 +29,13 @@ export function CallToAction() {
               >
                 <Phone size={18} />
                 {DISPLAY_PHONE_NUMBER}
+              </a>
+              <a
+                href={EMAIL_LINK}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 bg-white/80 px-6 py-4 text-sm font-black text-ink transition hover:-translate-y-0.5 hover:bg-ink hover:text-white"
+              >
+                <Mail size={18} />
+                {EMAIL_ADDRESS}
               </a>
             </div>
           </div>

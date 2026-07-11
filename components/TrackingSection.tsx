@@ -8,9 +8,9 @@ export function TrackingSection() {
       <GsapReveal className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <div>
           <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Suivi colis</p>
-          <h2 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">Voyez ou en est votre livraison</h2>
+          <h2 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">Voyez où en est votre livraison</h2>
           <p className="mt-4 max-w-xl text-sm leading-7 text-white/68">
-            Entrez le code recu par Mr. Delivery ou scannez le QR code de votre facture pour consulter l'etat du colis.
+            Entrez le code reçu par Mr. Delivery ou scannez le QR code de votre facture pour consulter l'état du colis.
           </p>
         </div>
 

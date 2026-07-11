@@ -9,12 +9,12 @@ export function Regulations() {
     <section id="reglement" data-nav-theme="light" className="bg-white px-4 py-16 text-ink sm:px-6 lg:px-8 lg:py-20">
       <div className="mx-auto max-w-7xl">
         <div className="max-w-2xl">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Reglement</p>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Règlement</p>
           <h2 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">
             Des conditions claires avant chaque course
           </h2>
           <p className="mt-4 text-sm leading-7 text-neutral-600">
-            Le paiement est effectue avant la reservation. Mr. Delivery confirme ensuite la disponibilite, le tarif et
+            Le paiement est effectué avant la réservation. Mr. Delivery confirme ensuite la disponibilité, le tarif et
             l'organisation de la livraison.
           </p>
         </div>

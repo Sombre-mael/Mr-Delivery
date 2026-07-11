@@ -3,18 +3,18 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: "Mr. Delivery | Livraison rapide a Lubumbashi",
+  title: "Mr. Delivery | Livraison rapide à Lubumbashi",
   description:
-    "Livraison express, fiable et securisee pour particuliers, commerces, restaurants, pharmacies et entreprises a Lubumbashi.",
+    "Livraison express, fiable et sécurisée pour particuliers, commerces, restaurants, pharmacies et entreprises à Lubumbashi.",
   icons: {
     icon: "/logo-mr-delivery.jpeg",
     shortcut: "/logo-mr-delivery.jpeg",
     apple: "/logo-mr-delivery.jpeg",
   },
   openGraph: {
-    title: "Mr. Delivery | Livraison rapide a Lubumbashi",
+    title: "Mr. Delivery | Livraison rapide à Lubumbashi",
     description:
-      "Livraison express, fiable et securisee pour particuliers, commerces, restaurants, pharmacies et entreprises a Lubumbashi.",
+      "Livraison express, fiable et sécurisée pour particuliers, commerces, restaurants, pharmacies et entreprises à Lubumbashi.",
     images: [
       {
         url: "/logo-mr-delivery.jpeg",
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "Mr. Delivery | Livraison rapide a Lubumbashi",
+    title: "Mr. Delivery | Livraison rapide à Lubumbashi",
     description:
-      "Livraison express, fiable et securisee pour particuliers, commerces, restaurants, pharmacies et entreprises a Lubumbashi.",
+      "Livraison express, fiable et sécurisée pour particuliers, commerces, restaurants, pharmacies et entreprises à Lubumbashi.",
     images: ["/logo-mr-delivery.jpeg"],
   },
 };

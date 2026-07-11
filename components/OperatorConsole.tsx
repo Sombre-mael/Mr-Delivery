@@ -33,10 +33,10 @@ const statusOptions = Object.entries(deliveryStatusLabels) as Array<[DeliverySta
 const historyFilters: Array<{ label: string; value: "all" | DeliveryStatus }> = [
   { label: "Toutes", value: "all" },
   { label: "Paiement", value: "payment_pending" },
-  { label: "Recupere", value: "picked_up" },
+  { label: "Récupéré", value: "picked_up" },
   { label: "En livraison", value: "in_delivery" },
-  { label: "Livre", value: "delivered" },
-  { label: "Probleme", value: "issue" },
+  { label: "Livré", value: "delivered" },
+  { label: "Problème", value: "issue" },
 ];
 
 type OperatorForm = StatusMessageInput & {
@@ -91,21 +91,21 @@ function orderToForm(order: DeliveryOrder): OperatorForm {
 function buildInvoicePayload(order: OperatorForm, trackingCode: string, trackingUrl: string) {
   return [
     "FACTURE MR. DELIVERY",
-    `Numero : ${order.invoiceNumber || "A generer"}`,
-    `Code suivi : ${trackingCode || "Apres creation"}`,
+    `Numéro : ${order.invoiceNumber || "À générer"}`,
+    `Code suivi : ${trackingCode || "Après création"}`,
     `Suivi : ${trackingUrl}`,
-    `Client : ${order.customerName || "A confirmer"}`,
-    `Telephone : ${order.customerPhone || "A confirmer"}`,
-    `Service : ${order.service || "A confirmer"}`,
-    `Besoin : ${order.need || "A confirmer"}`,
-    `Urgence : ${order.urgency || "A confirmer"}`,
-    `Pack : ${order.packName || "A confirmer"}`,
-    `Type colis : ${order.packageType || "A confirmer"}`,
-    `Montant : ${order.amount || "A confirmer"}`,
-    `Paiement : ${order.paymentStatus || "A confirmer"}`,
+    `Client : ${order.customerName || "À confirmer"}`,
+    `Téléphone : ${order.customerPhone || "À confirmer"}`,
+    `Service : ${order.service || "À confirmer"}`,
+    `Besoin : ${order.need || "À confirmer"}`,
+    `Urgence : ${order.urgency || "À confirmer"}`,
+    `Pack : ${order.packName || "À confirmer"}`,
+    `Type colis : ${order.packageType || "À confirmer"}`,
+    `Montant : ${order.amount || "À confirmer"}`,
+    `Paiement : ${order.paymentStatus || "À confirmer"}`,
     `Statut : ${deliveryStatusLabels[order.status]}`,
-    `Ramassage : ${order.pickup || "A confirmer"}`,
-    `Livraison : ${order.destination || "A confirmer"}`,
+    `Ramassage : ${order.pickup || "À confirmer"}`,
+    `Livraison : ${order.destination || "À confirmer"}`,
   ].join("\n");
 }
 
@@ -127,7 +127,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
   const [historyQuery, setHistoryQuery] = useState("");
   const [historyStatus, setHistoryStatus] = useState<"all" | DeliveryStatus>("all");
 
-  const trackingCode = activeOrder?.trackingCode || "A creer";
+  const trackingCode = activeOrder?.trackingCode || "À créer";
   const trackingUrl = activeOrder ? `${appUrl.replace(/\/$/, "")}/track/${activeOrder.trackingCode}` : `${appUrl.replace(/\/$/, "")}/track`;
   const statusMessage = useMemo(() => generateStatusMessage(form), [form]);
   const clientWhatsAppLink = useMemo(
@@ -140,14 +140,14 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
       {
         label: "Commandes",
         value: orders.length,
-        detail: "Total enregistre",
+        detail: "Total enregistré",
         icon: BarChart3,
         tone: "bg-ink text-white",
       },
       {
         label: "Paiement attendu",
         value: orders.filter((order) => order.status === "payment_pending").length,
-        detail: "A confirmer",
+        detail: "À confirmer",
         icon: Clock3,
         tone: "bg-gold text-ink",
       },
@@ -159,9 +159,9 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
         tone: "bg-ink text-gold",
       },
       {
-        label: "Livrees",
+        label: "Livrées",
         value: orders.filter((order) => order.status === "delivered").length,
-        detail: "Terminees",
+        detail: "Terminées",
         icon: PackageCheck,
         tone: "bg-white text-ink",
       },
@@ -244,10 +244,10 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
       <section className="mx-auto max-w-7xl print:hidden">
         <div className="flex flex-col gap-4 border-b border-ink/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Console equipe</p>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Console équipe</p>
             <h1 className="mt-2 text-3xl font-black leading-tight sm:text-4xl">Commandes, suivi client et facture QR</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-600">
-              Creez une commande, changez son statut, envoyez la relance WhatsApp et donnez au client un QR de suivi.
+              Créez une commande, changez son statut, envoyez la relance WhatsApp et donnez au client un QR de suivi.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -295,7 +295,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-black">Commandes</h2>
-                <p className="text-sm text-neutral-600">{orders.length} commande(s) recentes</p>
+                <p className="text-sm text-neutral-600">{orders.length} commande(s) récentes</p>
               </div>
               <button
                 type="button"
@@ -317,7 +317,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                       activeOrderId === order.id ? "border-gold bg-gold/10" : "border-ink/10 bg-[#fffdf7]"
                     }`}
                   >
-                    <span className="block text-sm font-black">{order.customerName || "Client a confirmer"}</span>
+                    <span className="block text-sm font-black">{order.customerName || "Client à confirmer"}</span>
                     <span className="mt-1 block text-xs font-bold text-neutral-500">{order.trackingCode}</span>
                     <span className="mt-3 inline-flex rounded-full bg-ink px-3 py-1 text-xs font-black text-white">
                       {deliveryStatusLabels[order.status]}
@@ -326,7 +326,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                 ))
               ) : (
                 <div className="rounded-xl border border-dashed border-ink/15 p-5 text-sm leading-6 text-neutral-600">
-                  Aucune commande pour le moment. Creez la premiere commande apres confirmation WhatsApp.
+                  Aucune commande pour le moment. Créez la première commande après confirmation WhatsApp.
                 </div>
               )}
             </div>
@@ -346,7 +346,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                 <div>
                   <h2 className="text-xl font-black">{activeOrder ? "Modifier la commande" : "Nouvelle commande"}</h2>
                   <p className="text-sm text-neutral-600">
-                    {activeOrder ? `Code suivi : ${activeOrder.trackingCode}` : "Le code suivi sera cree automatiquement."}
+                    {activeOrder ? `Code suivi : ${activeOrder.trackingCode}` : "Le code suivi sera créé automatiquement."}
                   </p>
                 </div>
               </div>
@@ -364,7 +364,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                 </label>
 
                 <label className="block">
-                  <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Telephone client</span>
+                  <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Téléphone client</span>
                   <input
                     name="customerPhone"
                     value={form.customerPhone}
@@ -387,7 +387,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                       type="button"
                       onClick={() => updateForm("invoiceNumber", createInvoiceNumber())}
                       className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-ink text-white transition hover:bg-gold hover:text-ink"
-                      aria-label="Regenerer le numero de facture"
+                      aria-label="Régénérer le numéro de facture"
                     >
                       <RefreshCw size={18} />
                     </button>
@@ -494,8 +494,8 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                     className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                   >
                     <option>Paiement attendu</option>
-                    <option>Paiement confirme</option>
-                    <option>Devis a confirmer</option>
+                    <option>Paiement confirmé</option>
+                    <option>Devis à confirmer</option>
                   </select>
                 </label>
 
@@ -565,7 +565,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                     name="notes"
                     value={form.notes}
                     onChange={(event) => updateForm("notes", event.target.value)}
-                    placeholder="Ex: reference paiement, livreur assigne, retard..."
+                    placeholder="Ex: référence paiement, livreur assigné, retard..."
                     rows={4}
                     className="mt-2 w-full resize-none rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                   />
@@ -576,7 +576,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                 type="submit"
                 className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-sm font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-gold hover:text-ink"
               >
-                {activeOrder ? "Enregistrer les modifications" : "Creer la commande"}
+                {activeOrder ? "Enregistrer les modifications" : "Créer la commande"}
                 <ArrowRight size={18} />
               </button>
             </form>
@@ -629,7 +629,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-black">{form.invoiceNumber}</p>
-                    <p className="mt-1 text-sm text-neutral-600">{form.customerName || "Client a confirmer"}</p>
+                    <p className="mt-1 text-sm text-neutral-600">{form.customerName || "Client à confirmer"}</p>
                     <p className="mt-1 text-sm font-black text-ink">{trackingCode}</p>
                     <a
                       href={trackingUrl}
@@ -654,7 +654,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.16em] text-gold">Historique</p>
-              <h2 className="mt-1 text-2xl font-black">Toutes les commandes passees</h2>
+              <h2 className="mt-1 text-2xl font-black">Toutes les commandes passées</h2>
             </div>
             <p className="text-sm font-bold text-neutral-500">
               {filteredOrders.length} / {orders.length} commande(s)
@@ -667,7 +667,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
               <input
                 value={historyQuery}
                 onChange={(event) => setHistoryQuery(event.target.value)}
-                placeholder="Rechercher nom, telephone, code, pack..."
+                placeholder="Rechercher nom, téléphone, code, pack..."
                 className="min-h-12 w-full rounded-full border border-ink/10 bg-[#fffdf7] pl-11 pr-4 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
               />
             </label>
@@ -694,7 +694,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                 <thead>
                   <tr className="border-b border-ink/10 text-xs font-black uppercase tracking-[0.12em] text-neutral-500">
                     <th className="py-3 pr-4">Client</th>
-                    <th className="py-3 pr-4">Telephone</th>
+                    <th className="py-3 pr-4">Téléphone</th>
                     <th className="py-3 pr-4">Code</th>
                     <th className="py-3 pr-4">Pack</th>
                     <th className="py-3 pr-4">Statut</th>
@@ -706,17 +706,17 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                 <tbody>
                   {filteredOrders.map((order) => (
                     <tr key={order.id} className="border-b border-ink/6 last:border-0">
-                      <td className="py-4 pr-4 font-black">{order.customerName || "A confirmer"}</td>
-                      <td className="py-4 pr-4 font-bold text-neutral-600">{order.customerPhone || "A confirmer"}</td>
+                      <td className="py-4 pr-4 font-black">{order.customerName || "À confirmer"}</td>
+                      <td className="py-4 pr-4 font-bold text-neutral-600">{order.customerPhone || "À confirmer"}</td>
                       <td className="py-4 pr-4 font-black text-gold">{order.trackingCode}</td>
-                      <td className="py-4 pr-4 font-bold text-neutral-600">{order.packName || "A confirmer"}</td>
+                      <td className="py-4 pr-4 font-bold text-neutral-600">{order.packName || "À confirmer"}</td>
                       <td className="py-4 pr-4">
                         <span className="inline-flex rounded-full bg-ink px-3 py-1 text-xs font-black text-white">
                           {deliveryStatusLabels[order.status]}
                         </span>
                       </td>
-                      <td className="py-4 pr-4 font-bold text-neutral-600">{order.paymentStatus || "A confirmer"}</td>
-                      <td className="py-4 pr-4 font-bold text-neutral-600">{order.amount || "A confirmer"}</td>
+                      <td className="py-4 pr-4 font-bold text-neutral-600">{order.paymentStatus || "À confirmer"}</td>
+                      <td className="py-4 pr-4 font-bold text-neutral-600">{order.amount || "À confirmer"}</td>
                       <td className="py-4 pr-4">
                         <button
                           type="button"
@@ -737,8 +737,8 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                   <article key={order.id} className="rounded-xl border border-ink/10 bg-[#fffdf7] p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-base font-black">{order.customerName || "A confirmer"}</p>
-                        <p className="mt-1 text-xs font-bold text-neutral-500">{order.customerPhone || "Telephone a confirmer"}</p>
+                        <p className="text-base font-black">{order.customerName || "À confirmer"}</p>
+                        <p className="mt-1 text-xs font-bold text-neutral-500">{order.customerPhone || "Téléphone à confirmer"}</p>
                       </div>
                       <span className="rounded-full bg-ink px-3 py-1 text-[0.68rem] font-black text-white">
                         {deliveryStatusLabels[order.status]}
@@ -751,15 +751,15 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                       </p>
                       <p>
                         <span className="block font-black uppercase text-neutral-500">Pack</span>
-                        <span className="mt-1 block font-bold text-neutral-700">{order.packName || "A confirmer"}</span>
+                        <span className="mt-1 block font-bold text-neutral-700">{order.packName || "À confirmer"}</span>
                       </p>
                       <p>
                         <span className="block font-black uppercase text-neutral-500">Paiement</span>
-                        <span className="mt-1 block font-bold text-neutral-700">{order.paymentStatus || "A confirmer"}</span>
+                        <span className="mt-1 block font-bold text-neutral-700">{order.paymentStatus || "À confirmer"}</span>
                       </p>
                       <p>
                         <span className="block font-black uppercase text-neutral-500">Montant</span>
-                        <span className="mt-1 block font-bold text-neutral-700">{order.amount || "A confirmer"}</span>
+                        <span className="mt-1 block font-bold text-neutral-700">{order.amount || "À confirmer"}</span>
                       </p>
                     </div>
                     <button
@@ -775,7 +775,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
             </>
           ) : (
             <div className="mt-5 rounded-xl border border-dashed border-ink/15 p-5 text-sm leading-6 text-neutral-600">
-              Aucune commande ne correspond a cette recherche.
+              Aucune commande ne correspond à cette recherche.
             </div>
           )}
         </section>
@@ -799,34 +799,34 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
             <span className="font-black">Code suivi :</span> {trackingCode}
           </p>
           <p>
-            <span className="font-black">Client :</span> {form.customerName || "A confirmer"}
+            <span className="font-black">Client :</span> {form.customerName || "À confirmer"}
           </p>
           <p>
-            <span className="font-black">Telephone :</span> {form.customerPhone || "A confirmer"}
+            <span className="font-black">Téléphone :</span> {form.customerPhone || "À confirmer"}
           </p>
           <p>
             <span className="font-black">Pack :</span> {form.packName}
           </p>
           <p>
-            <span className="font-black">Service :</span> {form.service || "A confirmer"}
+            <span className="font-black">Service :</span> {form.service || "À confirmer"}
           </p>
           <p>
-            <span className="font-black">Type colis :</span> {form.packageType || "A confirmer"}
+            <span className="font-black">Type colis :</span> {form.packageType || "À confirmer"}
           </p>
           <p>
-            <span className="font-black">Urgence :</span> {form.urgency || "A confirmer"}
+            <span className="font-black">Urgence :</span> {form.urgency || "À confirmer"}
           </p>
           <p>
-            <span className="font-black">Montant :</span> {form.amount || "A confirmer"}
+            <span className="font-black">Montant :</span> {form.amount || "À confirmer"}
           </p>
           <p>
             <span className="font-black">Paiement :</span> {form.paymentStatus}
           </p>
           <p>
-            <span className="font-black">Ramassage :</span> {form.pickup || "A confirmer"}
+            <span className="font-black">Ramassage :</span> {form.pickup || "À confirmer"}
           </p>
           <p>
-            <span className="font-black">Livraison :</span> {form.destination || "A confirmer"}
+            <span className="font-black">Livraison :</span> {form.destination || "À confirmer"}
           </p>
         </div>
 

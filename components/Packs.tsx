@@ -55,7 +55,7 @@ export function Packs() {
             </h2>
           </div>
           <p className="max-w-md text-sm leading-6 text-neutral-600">
-            Des offres claires pour les courses rapides, les commerces, la sante et les colis plus lourds.
+            Des offres claires pour les courses rapides, les commerces, la santé et les colis plus lourds.
           </p>
         </div>
 
@@ -80,13 +80,13 @@ export function Packs() {
 
                 <h3 className="pr-20 text-xl font-black">{pack.name}</h3>
                 <p className={`mt-2 text-sm font-semibold ${pack.popular ? "text-white/70" : "text-neutral-600"}`}>
-                  Ideal pour : {pack.idealFor}
+                  Idéal pour : {pack.idealFor}
                 </p>
 
                 <div className="mt-5">
                   <p className="text-2xl font-black">{pack.price}</p>
                   <p className={`mt-1 text-sm font-semibold ${pack.popular ? "text-gold" : "text-neutral-600"}`}>
-                    Delai : {pack.delay}
+                    Délai : {pack.delay}
                   </p>
                 </div>
 

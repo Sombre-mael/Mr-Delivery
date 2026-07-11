@@ -15,18 +15,18 @@ export const dynamic = "force-dynamic";
 const timeline: Array<{ status: DeliveryStatus; title: string; description: string }> = [
   {
     status: "payment_pending",
-    title: "Reservation",
-    description: "La demande est creee et attend la confirmation du paiement.",
+    title: "Réservation",
+    description: "La demande est créée et attend la confirmation du paiement.",
   },
   {
     status: "payment_confirmed",
-    title: "Paiement confirme",
-    description: "La course est confirmee par l'equipe Mr. Delivery.",
+    title: "Paiement confirmé",
+    description: "La course est confirmée par l'équipe Mr. Delivery.",
   },
   {
     status: "picked_up",
-    title: "Colis recupere",
-    description: "Le colis a ete pris en charge au lieu de ramassage.",
+    title: "Colis récupéré",
+    description: "Le colis a été pris en charge au lieu de ramassage.",
   },
   {
     status: "in_delivery",
@@ -35,8 +35,8 @@ const timeline: Array<{ status: DeliveryStatus; title: string; description: stri
   },
   {
     status: "delivered",
-    title: "Livre",
-    description: "Le colis est arrive a destination.",
+    title: "Livré",
+    description: "Le colis est arrivé à destination.",
   },
 ];
 
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: TrackingDetailPageProps): Pro
 
   return {
     title: `Suivi ${code.toUpperCase()} | Mr. Delivery`,
-    description: "Etat de livraison Mr. Delivery.",
+    description: "État de livraison Mr. Delivery.",
     robots: {
       index: false,
       follow: false,
@@ -91,14 +91,14 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
           <AlertTriangle className="mx-auto text-gold" size={42} />
           <h1 className="mt-4 text-2xl font-black">Code introuvable</h1>
           <p className="mt-3 text-sm leading-6 text-neutral-600">
-            Nous n'avons trouve aucune commande avec le code {code.toUpperCase()}. Verifiez le code ou contactez Mr. Delivery.
+            Nous n'avons trouvé aucune commande avec le code {code.toUpperCase()}. Vérifiez le code ou contactez Mr. Delivery.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <a
               href="/track"
               className="inline-flex items-center justify-center rounded-full bg-ink px-6 py-3 text-sm font-black text-white transition hover:bg-gold hover:text-ink"
             >
-              Reessayer
+              Réessayer
             </a>
             <a
               href={supportLink}
@@ -172,17 +172,17 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
                 <StatusIcon size={28} />
               </span>
               <div>
-                <p className="text-sm font-black uppercase tracking-[0.16em] text-gold">Etat actuel</p>
+                <p className="text-sm font-black uppercase tracking-[0.16em] text-gold">État actuel</p>
                 <h2 className="mt-2 text-3xl font-black">{deliveryStatusLabels[order.status]}</h2>
                 <p className="mt-3 text-sm leading-7 text-white/70">
-                  Derniere mise a jour: {formatDate(order.updatedAt)}
+                  Dernière mise à jour : {formatDate(order.updatedAt)}
                 </p>
               </div>
             </div>
 
             {order.status === "issue" ? (
               <div className="mt-6 rounded-xl border border-gold/30 bg-gold/10 p-4 text-sm leading-6 text-white/80">
-                Une information importante concerne cette course. L'equipe Mr. Delivery vous contactera pour clarifier.
+                Une information importante concerne cette course. L'équipe Mr. Delivery vous contactera pour clarifier.
               </div>
             ) : null}
 
@@ -193,16 +193,16 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
               className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gold px-5 py-3 text-sm font-black text-ink transition hover:bg-white"
             >
               <MessageCircle size={17} />
-              Demander une mise a jour
+              Demander une mise à jour
             </a>
           </div>
 
           <div className="rounded-2xl border border-ink/8 bg-white p-5 shadow-soft sm:p-6">
-            <h2 className="text-xl font-black">Details de la livraison</h2>
+            <h2 className="text-xl font-black">Détails de la livraison</h2>
             <div className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Client</span>
-                <span className="mt-1 block font-bold">{order.customerName || "A confirmer"}</span>
+                <span className="mt-1 block font-bold">{order.customerName || "À confirmer"}</span>
               </p>
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Facture</span>
@@ -210,31 +210,31 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
               </p>
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Pack</span>
-                <span className="mt-1 block font-bold">{order.packName || "A confirmer"}</span>
+                <span className="mt-1 block font-bold">{order.packName || "À confirmer"}</span>
               </p>
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Service</span>
-                <span className="mt-1 block font-bold">{order.service || "A confirmer"}</span>
+                <span className="mt-1 block font-bold">{order.service || "À confirmer"}</span>
               </p>
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Type de colis</span>
-                <span className="mt-1 block font-bold">{order.packageType || "A confirmer"}</span>
+                <span className="mt-1 block font-bold">{order.packageType || "À confirmer"}</span>
               </p>
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Urgence</span>
-                <span className="mt-1 block font-bold">{order.urgency || "A confirmer"}</span>
+                <span className="mt-1 block font-bold">{order.urgency || "À confirmer"}</span>
               </p>
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Paiement</span>
-                <span className="mt-1 block font-bold">{order.paymentStatus || "A confirmer"}</span>
+                <span className="mt-1 block font-bold">{order.paymentStatus || "À confirmer"}</span>
               </p>
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Ramassage</span>
-                <span className="mt-1 block font-bold">{order.pickup || "A confirmer"}</span>
+                <span className="mt-1 block font-bold">{order.pickup || "À confirmer"}</span>
               </p>
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Livraison</span>
-                <span className="mt-1 block font-bold">{order.destination || "A confirmer"}</span>
+                <span className="mt-1 block font-bold">{order.destination || "À confirmer"}</span>
               </p>
             </div>
           </div>

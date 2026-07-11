@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { packs, services } from "@/lib/data";
-import { DISPLAY_PHONE_NUMBER, PHONE_LINK } from "@/lib/whatsapp";
+import { DISPLAY_PHONE_NUMBER, EMAIL_ADDRESS, EMAIL_LINK, PHONE_LINK } from "@/lib/whatsapp";
 
 export function Footer() {
   return (
@@ -18,9 +18,9 @@ export function Footer() {
             <span className="text-lg font-black">Mr. Delivery</span>
           </div>
           <p className="mt-4 max-w-sm text-sm leading-7 text-white/68">
-            Livraison rapide, fiable et securisee pour particuliers, commerces, restaurants, pharmacies et entreprises.
+            Livraison rapide, fiable et sécurisée pour particuliers, commerces, restaurants, pharmacies et entreprises.
           </p>
-          <p className="mt-4 text-sm font-black text-gold">Votre temps est precieux, nous le respectons.</p>
+          <p className="mt-4 text-sm font-black text-gold">Votre temps est précieux, nous le respectons.</p>
         </div>
 
         <div>
@@ -50,11 +50,16 @@ export function Footer() {
                 Appel normal : {DISPLAY_PHONE_NUMBER}
               </a>
             </li>
+            <li>
+              <a href={EMAIL_LINK} className="transition hover:text-gold">
+                Email : {EMAIL_ADDRESS}
+              </a>
+            </li>
             <li>WhatsApp Business : {DISPLAY_PHONE_NUMBER}</li>
-            <li>Disponible 7j/7 des 7h00</li>
+            <li>Disponible 7j/7 dès 7h00</li>
             <li>
               <a href="/operator" className="font-black text-gold transition hover:text-white">
-                Espace equipe
+                Espace équipe
               </a>
             </li>
           </ul>
@@ -62,7 +67,7 @@ export function Footer() {
       </div>
 
       <div className="mx-auto mt-10 max-w-7xl border-t border-white/10 pt-6 text-xs font-semibold text-white/45">
-        &copy; {new Date().getFullYear()} Mr. Delivery. Tous droits reserves.
+        &copy; {new Date().getFullYear()} Mr. Delivery. Tous droits réservés.
       </div>
     </footer>
   );

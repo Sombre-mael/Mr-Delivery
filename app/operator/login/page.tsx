@@ -5,8 +5,8 @@ import { loginAction } from "@/app/operator/actions";
 import { isOperatorAuthenticated } from "@/lib/operator-auth";
 
 export const metadata: Metadata = {
-  title: "Connexion equipe | Mr. Delivery",
-  description: "Acces equipe Mr. Delivery.",
+  title: "Connexion équipe | Mr. Delivery",
+  description: "Accès équipe Mr. Delivery.",
   robots: {
     index: false,
     follow: false,
@@ -39,12 +39,12 @@ export default async function OperatorLoginPage({ searchParams }: OperatorLoginP
           />
           <div>
             <p className="text-sm font-black uppercase tracking-[0.16em] text-gold">Mr. Delivery</p>
-            <h1 className="text-2xl font-black">Espace equipe</h1>
+            <h1 className="text-2xl font-black">Espace équipe</h1>
           </div>
         </div>
 
         <p className="mt-5 text-sm leading-6 text-neutral-600">
-          Connectez-vous pour gerer les commandes, les statuts colis et les factures QR.
+          Connectez-vous pour gérer les commandes, les statuts colis et les factures QR.
         </p>
 
         <form action={loginAction} className="mt-6 space-y-4">
@@ -67,7 +67,7 @@ export default async function OperatorLoginPage({ searchParams }: OperatorLoginP
 
           {hasConfigError ? (
             <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
-              Configuration admin invalide. Verifiez `ADMIN_PASSWORD_HASH` et `SESSION_SECRET` dans Vercel.
+              Configuration admin invalide. Vérifiez `ADMIN_PASSWORD_HASH` et `SESSION_SECRET` dans Vercel.
             </p>
           ) : null}
 

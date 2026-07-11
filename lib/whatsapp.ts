@@ -1,6 +1,8 @@
 export const WHATSAPP_NUMBER = "243819428849";
 export const DISPLAY_PHONE_NUMBER = "+243 819 428 849";
 export const PHONE_LINK = "tel:+243819428849";
+export const EMAIL_ADDRESS = "mrdelivery004@gmail.com";
+export const EMAIL_LINK = `mailto:${EMAIL_ADDRESS}`;
 
 export type DeliveryStatus =
   | "payment_pending"
@@ -54,11 +56,11 @@ export type TrackingSupportMessageInput = {
 
 export const deliveryStatusLabels: Record<DeliveryStatus, string> = {
   payment_pending: "Paiement attendu",
-  payment_confirmed: "Paiement confirme",
-  picked_up: "Colis recupere",
+  payment_confirmed: "Paiement confirmé",
+  picked_up: "Colis récupéré",
   in_delivery: "En cours de livraison",
-  delivered: "Livre",
-  issue: "Probleme ou retard",
+  delivered: "Livré",
+  issue: "Problème ou retard",
 };
 
 export function generateWhatsAppLink(message: string) {
@@ -91,8 +93,8 @@ export function generatePackMessage(packName: string) {
   return [
     "NOUVELLE DEMANDE MR. DELIVERY",
     "",
-    `Bonjour Mr. Delivery, je suis interesse par le ${packName}.`,
-    "Merci de me donner les details pour une livraison a Lubumbashi.",
+    `Bonjour Mr. Delivery, je suis intéressé par le ${packName}.`,
+    "Merci de me donner les détails pour une livraison à Lubumbashi.",
   ].join("\n");
 }
 
@@ -102,20 +104,20 @@ export function generateGeneralOrderMessage() {
     "",
     "Bonjour Mr. Delivery, je souhaite demander une livraison.",
     "",
-    "Service souhaite :",
+    "Service souhaité :",
     "Nom :",
-    "Telephone :",
+    "Téléphone :",
     "Lieu de ramassage :",
     "Lieu de livraison :",
     "Type de colis :",
-    "Details :",
+    "Détails :",
     "",
-    "Merci de me confirmer la disponibilite.",
+    "Merci de me confirmer la disponibilité.",
   ].join("\n");
 }
 
 export function generateCustomOrderMessage(order: OrderMessageInput) {
-  const selectedPack = order.packName ? `Pack choisi : ${order.packName}` : "Pack choisi : A confirmer";
+  const selectedPack = order.packName ? `Pack choisi : ${order.packName}` : "Pack choisi : À confirmer";
 
   return [
     "NOUVELLE DEMANDE MR. DELIVERY",
@@ -123,19 +125,19 @@ export function generateCustomOrderMessage(order: OrderMessageInput) {
     "Bonjour Mr. Delivery, je souhaite demander une livraison.",
     "",
     selectedPack,
-    `Service souhaite : ${order.service || "A preciser"}`,
-    `Besoin client : ${order.need || "A preciser"}`,
-    `Urgence : ${order.urgency || "A preciser"}`,
-    `Nom : ${order.name || "A preciser"}`,
-    `Telephone : ${order.phone || "A preciser"}`,
-    `Lieu de ramassage : ${order.pickup || "A preciser"}`,
+    `Service souhaité : ${order.service || "À préciser"}`,
+    `Besoin client : ${order.need || "À préciser"}`,
+    `Urgence : ${order.urgency || "À préciser"}`,
+    `Nom : ${order.name || "À préciser"}`,
+    `Téléphone : ${order.phone || "À préciser"}`,
+    `Lieu de ramassage : ${order.pickup || "À préciser"}`,
     `GPS ramassage : ${order.pickupMapUrl || "Non fourni"}`,
-    `Lieu de livraison : ${order.destination || "A preciser"}`,
+    `Lieu de livraison : ${order.destination || "À préciser"}`,
     `GPS livraison : ${order.destinationMapUrl || "Non fourni"}`,
-    `Type de colis : ${order.packageType || "A preciser"}`,
-    `Details : ${order.details || "A preciser"}`,
+    `Type de colis : ${order.packageType || "À préciser"}`,
+    `Détails : ${order.details || "À préciser"}`,
     "",
-    "Merci de me confirmer la disponibilite.",
+    "Merci de me confirmer la disponibilité.",
   ].join("\n");
 }
 
@@ -145,7 +147,7 @@ export function generateReviewMessage(review: ReviewMessageInput) {
     "",
     `Note : ${review.rating}/5`,
     `Nom : ${review.name || "Client"}`,
-    `Commentaire : ${review.comment || "Aucun commentaire ajoute"}`,
+    `Commentaire : ${review.comment || "Aucun commentaire ajouté"}`,
     "",
     "Merci pour votre service.",
   ].join("\n");
@@ -157,13 +159,13 @@ export function generateTrackingSupportMessage(input: TrackingSupportMessageInpu
     "",
     "Bonjour Mr. Delivery, j'ai besoin d'aide concernant mon colis.",
     "",
-    `Code suivi : ${input.trackingCode || "A preciser"}`,
-    `Facture : ${input.invoiceNumber || "A preciser"}`,
-    `Statut actuel : ${input.statusLabel || "A verifier"}`,
-    `Ramassage : ${input.pickup || "A confirmer"}`,
-    `Livraison : ${input.destination || "A confirmer"}`,
+    `Code suivi : ${input.trackingCode || "À préciser"}`,
+    `Facture : ${input.invoiceNumber || "À préciser"}`,
+    `Statut actuel : ${input.statusLabel || "À vérifier"}`,
+    `Ramassage : ${input.pickup || "À confirmer"}`,
+    `Livraison : ${input.destination || "À confirmer"}`,
     "",
-    "Merci de me donner une mise a jour.",
+    "Merci de me donner une mise à jour.",
   ].join("\n");
 }
 
@@ -173,23 +175,23 @@ export function generateMapsLink(latitude: number, longitude: number) {
 
 export function generateStatusMessage(input: StatusMessageInput) {
   const customer = input.customerName || "Cher client";
-  const invoice = input.invoiceNumber ? `Facture : ${input.invoiceNumber}` : "Facture : A confirmer";
-  const pack = input.packName ? `Pack : ${input.packName}` : "Pack : A confirmer";
-  const route = `Trajet : ${input.pickup || "Ramassage a confirmer"} -> ${input.destination || "Destination a confirmer"}`;
-  const amount = input.amount ? `Montant : ${input.amount}` : "Montant : A confirmer";
-  const payment = input.paymentStatus ? `Paiement : ${input.paymentStatus}` : "Paiement : A confirmer";
+  const invoice = input.invoiceNumber ? `Facture : ${input.invoiceNumber}` : "Facture : À confirmer";
+  const pack = input.packName ? `Pack : ${input.packName}` : "Pack : À confirmer";
+  const route = `Trajet : ${input.pickup || "Ramassage à confirmer"} -> ${input.destination || "Destination à confirmer"}`;
+  const amount = input.amount ? `Montant : ${input.amount}` : "Montant : À confirmer";
+  const payment = input.paymentStatus ? `Paiement : ${input.paymentStatus}` : "Paiement : À confirmer";
   const notes = input.notes ? `Note : ${input.notes}` : "";
 
   const statusMessage: Record<DeliveryStatus, string> = {
     payment_pending:
-      "Votre demande est prete. Merci d'effectuer le paiement pour confirmer la reservation de votre livraison.",
+      "Votre demande est prête. Merci d'effectuer le paiement pour confirmer la réservation de votre livraison.",
     payment_confirmed:
-      "Votre paiement est confirme. Mr. Delivery organise maintenant la prise en charge de votre colis.",
-    picked_up: "Votre colis a ete recupere. Nous vous tenons informe de la suite de la livraison.",
+      "Votre paiement est confirmé. Mr. Delivery organise maintenant la prise en charge de votre colis.",
+    picked_up: "Votre colis a été récupéré. Nous vous tenons informé de la suite de la livraison.",
     in_delivery: "Votre colis est actuellement en cours de livraison.",
-    delivered: "Votre colis a ete livre. Merci d'avoir choisi Mr. Delivery.",
+    delivered: "Votre colis a été livré. Merci d'avoir choisi Mr. Delivery.",
     issue:
-      "Nous avons une information importante concernant votre livraison. Notre equipe vous contacte pour clarifier la situation.",
+      "Nous avons une information importante concernant votre livraison. Notre équipe vous contacte pour clarifier la situation.",
   };
 
   return [
@@ -205,7 +207,7 @@ export function generateStatusMessage(input: StatusMessageInput) {
     route,
     notes,
     "",
-    "Mr. Delivery - Votre temps est precieux, nous le respectons.",
+    "Mr. Delivery - Votre temps est précieux, nous le respectons.",
   ]
     .filter(Boolean)
     .join("\n");

@@ -10,7 +10,7 @@ import { generateCustomOrderMessage, generateMapsLink, generateWhatsAppLink, typ
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const stepLabels = ["Besoin", "Colis", "Coordonnees", "Confirmation"];
+const stepLabels = ["Besoin", "Colis", "Coordonnées", "Confirmation"];
 
 const initialOrder: OrderMessageInput = {
   name: "",
@@ -120,7 +120,7 @@ export function OrderComposer() {
     setLocationMessage("");
 
     if (!navigator.geolocation) {
-      setLocationMessage("La geolocalisation n'est pas disponible sur cet appareil.");
+      setLocationMessage("La géolocalisation n'est pas disponible sur cet appareil.");
       return;
     }
 
@@ -129,11 +129,11 @@ export function OrderComposer() {
       (position) => {
         const mapUrl = generateMapsLink(position.coords.latitude, position.coords.longitude);
         updateOrder(field, mapUrl);
-        setLocationMessage("Position ajoutee au message WhatsApp.");
+        setLocationMessage("Position ajoutée au message WhatsApp.");
         setLocatingField(null);
       },
       () => {
-        setLocationMessage("Position non recuperee. Vous pouvez continuer avec l'adresse manuelle.");
+        setLocationMessage("Position non récupérée. Vous pouvez continuer avec l'adresse manuelle.");
         setLocatingField(null);
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
@@ -170,17 +170,17 @@ export function OrderComposer() {
           <div className="lg:sticky lg:top-28">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Assistant livraison</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-ink sm:text-4xl">
-              Trouvez la bonne livraison avant d'ecrire sur WhatsApp
+              Trouvez la bonne livraison avant d'écrire sur WhatsApp
             </h2>
             <p className="mt-4 max-w-xl text-base leading-7 text-neutral-700">
-              Repondez a quelques questions. Mr. Delivery vous propose le pack le plus logique et prepare un message
-              clair pour l'equipe.
+              Répondez à quelques questions. Mr. Delivery vous propose le pack le plus logique et prépare un message
+              clair pour l'équipe.
             </p>
 
             <div className="mt-6 rounded-2xl border border-ink/8 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-neutral-500">Pack recommande</p>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-neutral-500">Pack recommandé</p>
                   <h3 className="mt-2 text-2xl font-black text-ink">{recommendedPack.name}</h3>
                 </div>
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gold text-ink">
@@ -193,12 +193,12 @@ export function OrderComposer() {
                   <p className="mt-1 text-sm font-black text-ink">{recommendedPack.price}</p>
                 </div>
                 <div className="rounded-lg bg-amberSoft p-3">
-                  <p className="text-xs font-black uppercase text-neutral-500">Delai</p>
+                  <p className="text-xs font-black uppercase text-neutral-500">Délai</p>
                   <p className="mt-1 text-sm font-black text-ink">{recommendedPack.delay}</p>
                 </div>
               </div>
               <p className="mt-4 text-xs font-semibold leading-5 text-neutral-500">
-                Recommandation indicative. L'equipe confirme toujours la disponibilite et le tarif final via WhatsApp.
+                Recommandation indicative. L'équipe confirme toujours la disponibilité et le tarif final via WhatsApp.
               </p>
             </div>
           </div>
@@ -207,7 +207,7 @@ export function OrderComposer() {
             <div className="mb-6">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-black text-ink">
-                  Etape {step + 1} / {stepLabels.length}
+                  Étape {step + 1} / {stepLabels.length}
                 </p>
                 <p className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">{stepLabels[step]}</p>
               </div>
@@ -255,7 +255,7 @@ export function OrderComposer() {
 
               {step === 1 ? (
                 <div>
-                  <h3 className="text-2xl font-black text-ink">Precisez l'urgence et le colis</h3>
+                  <h3 className="text-2xl font-black text-ink">Précisez l'urgence et le colis</h3>
                   <div className="mt-5 grid gap-4 sm:grid-cols-2">
                     <label className="block">
                       <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Urgence</span>
@@ -286,11 +286,11 @@ export function OrderComposer() {
                       </select>
                     </label>
                     <label className="block sm:col-span-2">
-                      <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Details utiles</span>
+                      <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Détails utiles</span>
                       <textarea
                         value={order.details}
                         onChange={(event) => updateOrder("details", event.target.value)}
-                        placeholder="Ex: colis fragile, repas chaud, besoin de photo, point de repere..."
+                        placeholder="Ex: colis fragile, repas chaud, besoin de photo, point de repère..."
                         rows={5}
                         className="mt-2 w-full resize-none rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15"
                       />
@@ -301,7 +301,7 @@ export function OrderComposer() {
 
               {step === 2 ? (
                 <div>
-                  <h3 className="text-2xl font-black text-ink">Ou doit-on recuperer et livrer ?</h3>
+                  <h3 className="text-2xl font-black text-ink">Où doit-on récupérer et livrer ?</h3>
                   <div className="mt-5 grid gap-4 sm:grid-cols-2">
                     <label className="block">
                       <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Nom</span>
@@ -313,7 +313,7 @@ export function OrderComposer() {
                       />
                     </label>
                     <label className="block">
-                      <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Telephone</span>
+                      <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Téléphone</span>
                       <input
                         value={order.phone}
                         onChange={(event) => updateOrder("phone", event.target.value)}
@@ -382,10 +382,10 @@ export function OrderComposer() {
 
               {step === 3 ? (
                 <div>
-                  <h3 className="text-2xl font-black text-ink">Votre demande est prete</h3>
+                  <h3 className="text-2xl font-black text-ink">Votre demande est prête</h3>
                   <div className="mt-5 grid gap-3 sm:grid-cols-3">
                     <div className="rounded-lg bg-amberSoft p-4">
-                      <p className="text-xs font-black uppercase text-neutral-500">Completion</p>
+                      <p className="text-xs font-black uppercase text-neutral-500">Complétion</p>
                       <p className="mt-1 text-xl font-black text-ink">{completedFields}/7</p>
                     </div>
                     <div className="rounded-lg bg-amberSoft p-4">
@@ -400,7 +400,7 @@ export function OrderComposer() {
                   <div className="mt-5 rounded-lg border border-ink/8 bg-ink p-4 text-white">
                     <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-gold">
                       <MessageCircle size={16} />
-                      Apercu du message
+                      Aperçu du message
                     </p>
                     <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap text-xs leading-5 text-white/74">
                       {message}

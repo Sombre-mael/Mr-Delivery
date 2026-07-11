@@ -53,15 +53,15 @@ export function Hero() {
         <div className="hero-copy max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/12 px-4 py-2 text-sm font-black text-ink">
             <MapPin size={16} />
-            Livraison rapide a Lubumbashi
+            Livraison rapide à Lubumbashi
           </div>
 
           <h1 className="mt-6 text-4xl font-black leading-[1.03] text-ink sm:text-5xl lg:text-6xl">
-            Votre temps est precieux, nous le respectons.
+            Votre temps est précieux, nous le respectons.
           </h1>
 
           <p className="mt-5 max-w-2xl text-base leading-8 text-neutral-700 sm:text-lg">
-            Livraison express, fiable et securisee pour particuliers, commerces, restaurants, pharmacies et entreprises a
+            Livraison express, fiable et sécurisée pour particuliers, commerces, restaurants, pharmacies et entreprises à
             Lubumbashi.
           </p>
 
@@ -102,7 +102,7 @@ export function Hero() {
           <div className="relative overflow-hidden rounded-2xl border border-white bg-ink shadow-soft">
             <Image
               src="/hero-delivery.png"
-              alt="Livreur Mr. Delivery a moto"
+              alt="Livreur Mr. Delivery à moto"
               width={1200}
               height={900}
               priority
@@ -114,7 +114,7 @@ export function Hero() {
                 <ShieldCheck size={22} />
               </div>
               <div>
-                <p className="text-sm font-black text-ink">Course confirmee</p>
+                <p className="text-sm font-black text-ink">Course confirmée</p>
                 <p className="text-xs font-semibold text-neutral-600">Suivi, preuve et support WhatsApp</p>
               </div>
             </div>

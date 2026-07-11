@@ -22,10 +22,10 @@ export function Reviews() {
           <div>
             <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Avis clients</p>
             <h2 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">
-              Votre retour aide a ameliorer le service
+              Votre retour aide à améliorer le service
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-7 text-neutral-700">
-              Les avis envoyes ici partent sur WhatsApp pour validation manuelle. Ils ne sont pas publies
+              Les avis envoyés ici partent sur WhatsApp pour validation manuelle. Ils ne sont pas publiés
               automatiquement sur le site.
             </p>
 
@@ -65,7 +65,7 @@ export function Reviews() {
                     className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${
                       value <= rating ? "border-gold bg-gold text-ink" : "border-ink/10 bg-[#fffdf7] text-neutral-400"
                     }`}
-                    aria-label={`Donner ${value} etoile${value > 1 ? "s" : ""}`}
+                    aria-label={`Donner ${value} étoile${value > 1 ? "s" : ""}`}
                   >
                     <Star size={19} fill={value <= rating ? "currentColor" : "none"} />
                   </button>
@@ -88,7 +88,7 @@ export function Reviews() {
               <textarea
                 value={comment}
                 onChange={(event) => setComment(event.target.value)}
-                placeholder="Dites-nous comment s'est passee votre experience."
+                placeholder="Dites-nous comment s'est passée votre expérience."
                 rows={5}
                 className="mt-2 w-full resize-none rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15"
               />
@@ -97,10 +97,10 @@ export function Reviews() {
             <div className="mt-5 rounded-lg border border-ink/8 bg-ink p-4 text-white">
               <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-gold">
                 <MessageCircle size={16} />
-                Apercu WhatsApp
+                Aperçu WhatsApp
               </p>
               <p className="mt-3 text-sm leading-6 text-white/72">
-                Note {rating}/5 - {name || "Client"} - {comment || "Aucun commentaire ajoute"}
+                Note {rating}/5 - {name || "Client"} - {comment || "Aucun commentaire ajouté"}
               </p>
             </div>
 

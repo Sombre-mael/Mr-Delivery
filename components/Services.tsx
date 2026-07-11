@@ -71,7 +71,7 @@ export function Services() {
         <div className="max-w-2xl">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Services</p>
           <h2 className="mt-3 text-3xl font-black leading-tight text-ink sm:text-4xl">
-            Une livraison adaptee a chaque besoin
+            Une livraison adaptée à chaque besoin
           </h2>
         </div>
 

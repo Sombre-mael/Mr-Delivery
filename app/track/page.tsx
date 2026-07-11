@@ -5,7 +5,7 @@ import { trackOrderAction } from "@/app/track/actions";
 
 export const metadata: Metadata = {
   title: "Suivre mon colis | Mr. Delivery",
-  description: "Consultez l'etat de votre livraison Mr. Delivery avec votre code de suivi.",
+  description: "Consultez l'état de votre livraison Mr. Delivery avec votre code de suivi.",
 };
 
 type TrackPageProps = {
@@ -67,7 +67,7 @@ export default async function TrackPage({ searchParams }: TrackPageProps) {
 
         <div className="mt-5 flex items-start gap-3 rounded-lg bg-[#fffdf7] p-4 text-sm leading-6 text-neutral-600">
           <QrCode className="mt-0.5 shrink-0 text-gold" size={20} />
-          <p>Si vous avez une facture avec QR code, scannez-la simplement avec votre telephone.</p>
+          <p>Si vous avez une facture avec QR code, scannez-la simplement avec votre téléphone.</p>
         </div>
 
         <a href="/" className="mt-5 inline-flex text-sm font-black text-neutral-500 transition hover:text-gold">

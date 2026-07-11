@@ -143,7 +143,7 @@ export async function createOrder(input: OrderInput) {
 
   await sql`
     INSERT INTO order_events (order_id, status, note)
-    VALUES (${id}, ${input.status}, ${input.notes || "Commande creee"})
+      VALUES (${id}, ${input.status}, ${input.notes || "Commande créée"})
   `;
 
   return mapOrder(rows[0]);
@@ -187,7 +187,7 @@ export async function updateOrder(orderId: string, input: OrderInput) {
   if (previousStatus !== input.status) {
     await sql`
       INSERT INTO order_events (order_id, status, note)
-      VALUES (${orderId}, ${input.status}, ${input.notes || "Statut mis a jour"})
+      VALUES (${orderId}, ${input.status}, ${input.notes || "Statut mis à jour"})
     `;
   }
 
