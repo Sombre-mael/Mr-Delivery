@@ -1,160 +1,112 @@
-# Mr. Delivery
+<div align="center">
+  <img src="public/logo-mr-delivery.png" alt="Logo Mr. Delivery" width="220" />
 
-Landing page interactive pour Mr. Delivery, service de livraison rapide à Lubumbashi, RDC.
+  # Mr. Delivery
 
-## Stack
+  **Vos colis pris en charge rapidement, suivis simplement.**
 
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- GSAP
-- pnpm
+  Plateforme de commande et de suivi de livraison conçue pour les particuliers,
+  commerces et entreprises de Lubumbashi.
 
-## Fonctionnalités
+  [Accéder à Mr. Delivery](https://mr-delivery-nine.vercel.app) · [Suivre un colis](https://mr-delivery-nine.vercel.app/track)
+</div>
 
-- Landing page mobile-first
-- Assistant de commande WhatsApp
-- Capture GPS pour ramassage et livraison
-- Avis clients envoyés via WhatsApp
-- Section règlement avec paiement avant réservation
-- Suivi colis par code et QR facture
-- Console équipe protégée par mot de passe
-- Stockage des commandes et statuts via Neon Postgres
-- Animations GSAP et loading screen
-- Metadata Open Graph avec logo
+## Une livraison plus simple
 
-## Installation
+Mr. Delivery centralise le parcours essentiel d'une livraison dans une expérience mobile claire. Le client décrit son besoin, partage les lieux de ramassage et de destination, échange avec l'équipe sur WhatsApp, puis suit l'évolution de son colis grâce à un code personnel.
 
-```powershell
-pnpm install
-```
+L'objectif du MVP est concret: réduire les échanges inutiles, rassurer le client et permettre à l'équipe de gérer chaque commande depuis un seul espace.
 
-## Développement
+## Expérience client
 
-```powershell
-pnpm run dev
-```
+- Assistant guidé pour préparer une demande de livraison
+- Recommandation de pack selon le besoin, le colis et l'urgence
+- Position GPS pour préciser le ramassage et la destination
+- Commande et confirmation via WhatsApp
+- Code de suivi individuel et facture avec QR code
+- Progression visible: paiement, récupération, livraison et arrivée
+- Notifications push lors des changements de statut
+- Installation mobile sous forme d'application PWA
+- Contact direct par WhatsApp ou appel téléphonique
 
-Ouvrir ensuite:
+## Outils pour l'équipe
 
-```txt
-http://localhost:3000
-```
+La console opérateur permet à Mr. Delivery de gérer l'activité quotidienne sans multiplier les outils:
 
-Pour tester depuis un téléphone ou un autre ordinateur du même Wi-Fi:
+- création et modification des commandes confirmées;
+- historique, recherche et filtrage des livraisons;
+- tableau de bord avec les principaux indicateurs;
+- mise à jour des statuts et relances WhatsApp;
+- notifications automatiques envoyées aux clients abonnés;
+- génération de factures et QR codes de suivi;
+- archivage des commandes terminées.
 
-```powershell
-pnpm run dev:network
-```
+## Parcours d'une commande
 
-Puis trouver l'adresse IPv4 locale:
+1. Le client prépare sa demande depuis le site.
+2. L'équipe confirme le service et le paiement sur WhatsApp.
+3. La commande est enregistrée avec un code de suivi unique.
+4. Le client installe Mr. Delivery sur son téléphone et active les notifications.
+5. L'équipe met à jour l'état du colis à chaque étape.
+6. Le client suit la progression jusqu'à la livraison.
 
-```powershell
-ipconfig
-```
+## Confiance et confidentialité
 
-Ouvrir ensuite `http://VOTRE-IPV4:3000` depuis l'autre appareil.
+- Les informations publiques de suivi sont partiellement masquées.
+- Les notes internes ne sont jamais affichées au client.
+- L'accès opérateur est protégé par une session sécurisée et un mot de passe haché.
+- Les codes de suivi sont générés de manière cryptographiquement sûre.
+- Les données de commande sont stockées dans PostgreSQL sur Neon.
+- Les pages [Confidentialité](https://mr-delivery-nine.vercel.app/confidentialite) et [Conditions](https://mr-delivery-nine.vercel.app/conditions) présentent les règles du service.
 
-## Vérification
+## État du produit
 
-```powershell
-pnpm run typecheck
-pnpm run build
-```
-
-Ou:
-
-```powershell
-pnpm run check
-```
-
-## Configuration
-
-Copier `.env.example` vers `.env.local`:
-
-```powershell
-Copy-Item .env.example .env.local
-```
-
-Mettre à jour:
-
-```txt
-NEXT_PUBLIC_SITE_URL=https://mr-delivery-nine.vercel.app
-NEXT_PUBLIC_APP_URL=https://mr-delivery-nine.vercel.app
-DATABASE_URL=postgresql://neondb_owner:...@ep-...pooler.../neondb?sslmode=require
-ADMIN_PASSWORD_HASH=generate-with-pnpm-hash-admin
-SESSION_SECRET=long-secret-aleatoire
-NEXT_PUBLIC_VAPID_PUBLIC_KEY=generate-with-pnpm-push-keys
-VAPID_PRIVATE_KEY=generate-with-pnpm-push-keys
-VAPID_SUBJECT=mailto:mrdelivery004@gmail.com
-```
-
-Appliquer ensuite les migrations Neon:
-
-```powershell
-pnpm run db:migrate
-```
-
-- `NEXT_PUBLIC_SITE_URL` sert aux images Open Graph et Twitter Card.
-- `NEXT_PUBLIC_APP_URL` sert de fallback pour les liens QR de suivi; en production, le domaine de la requête est détecté automatiquement.
-- `DATABASE_URL` est la chaîne de connexion Neon.
-- `ADMIN_PASSWORD_HASH` protège `/operator` sans stocker le mot de passe en clair.
-- `SESSION_SECRET` signe le cookie de session opérateur.
-
-Générer le hash du mot de passe équipe:
-
-```powershell
-pnpm hash:admin "votre-mot-de-passe"
-```
-
-Generer les cles de notifications une seule fois avec `pnpm push:keys`, puis ajouter les trois variables VAPID dans Vercel.
-
-Copier ensuite la valeur affichée par le script dans les variables d'environnement Vercel.
-En local uniquement, `ADMIN_PASSWORD` reste accepté comme fallback de développement.
-
-Dans Vercel, créer une variable nommée `ADMIN_PASSWORD_HASH` et coller uniquement la valeur qui commence par
-`scrypt$...`. Ne pas coller `ADMIN_PASSWORD_HASH=` dans le champ valeur.
-
-## Déploiement Vercel
-
-Configurer ces variables dans Vercel Project Settings > Environment Variables:
-
-```txt
-DATABASE_URL
-ADMIN_PASSWORD_HASH
-SESSION_SECRET
-NEXT_PUBLIC_APP_URL
-NEXT_PUBLIC_SITE_URL
-NEXT_PUBLIC_VAPID_PUBLIC_KEY
-VAPID_PRIVATE_KEY
-VAPID_SUBJECT
-```
-
-Pour `DATABASE_URL`, copier la chaîne de connexion complète depuis Neon > Connect > Connection string. Elle doit contenir
-le vrai domaine Neon `ep-...neon.tech`; ne pas garder `USER`, `PASSWORD` ou `HOST`.
-
-Puis pousser sur GitHub:
-
-```powershell
-git push origin main
-```
-
-Le projet Vercel connecté au repo GitHub redéploiera automatiquement la branche `main`.
-
-## Workflow équipe
-
-1. Aller sur `/operator`.
-2. Se connecter avec le mot de passe équipe.
-3. Créer une commande après confirmation client.
-4. Envoyer au client le message WhatsApp avec son code de suivi.
-5. Mettre à jour le statut quand le colis est récupéré, en livraison ou livré.
-
-Le client peut suivre son colis via `/track`, avec son code, ou via le QR code de la facture.
-
-Les procédures de sauvegarde, conservation et gestion d’incident sont décrites dans `docs/operations.md`.
+Mr. Delivery est actuellement un MVP prêt pour un pilote opérationnel. WhatsApp reste le canal principal de confirmation, tandis que la plateforme prend en charge la préparation des demandes, le suivi, les notifications et la gestion interne.
 
 ## Contact
 
-- Appel normal: +243 819 428 849
-- WhatsApp Business: +243 819 428 849
-- Email: mrdelivery004@gmail.com
+- Téléphone et WhatsApp: [+243 819 428 849](tel:+243819428849)
+- Email: [mrdelivery004@gmail.com](mailto:mrdelivery004@gmail.com)
+- Zone actuelle: Lubumbashi, République démocratique du Congo
+
+---
+
+## Documentation technique
+
+### Technologies
+
+Next.js App Router, TypeScript, Tailwind CSS, GSAP, Neon Postgres, Web Push et pnpm.
+
+### Démarrage local
+
+```powershell
+pnpm install
+Copy-Item .env.example .env.local
+pnpm run dev
+```
+
+L'application est alors disponible sur `http://localhost:3000`. Pour un test sur le même réseau Wi-Fi, utiliser `pnpm run dev:network` puis ouvrir `http://VOTRE-IPV4:3000` sur le téléphone.
+
+### Configuration
+
+Les variables nécessaires sont documentées dans `.env.example`. Les principales concernent Neon, la session administrateur, l'URL publique et les clés VAPID utilisées pour les notifications.
+
+```powershell
+pnpm hash:admin "votre-mot-de-passe"
+pnpm push:keys
+pnpm run db:migrate
+```
+
+### Vérification
+
+```powershell
+pnpm run typecheck
+pnpm run test
+pnpm run build
+```
+
+Les procédures d'exploitation, de sauvegarde et de gestion d'incident se trouvent dans [`docs/operations.md`](docs/operations.md).
+
+## Déploiement
+
+La branche `main` est déployée automatiquement sur Vercel après chaque push GitHub. Les secrets restent configurés dans Vercel et ne doivent jamais être ajoutés au dépôt.
