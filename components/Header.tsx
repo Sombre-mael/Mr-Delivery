@@ -4,12 +4,11 @@ import Image from "next/image";
 import { Menu, Phone, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { navLinks } from "@/lib/data";
-import { generateGeneralOrderMessage, generateWhatsAppLink, PHONE_LINK } from "@/lib/whatsapp";
+import { PHONE_LINK } from "@/lib/whatsapp";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [navTheme, setNavTheme] = useState<"light" | "dark">("light");
-  const orderLink = generateWhatsAppLink(generateGeneralOrderMessage());
 
   useEffect(() => {
     const getThemeFromPoint = () => {
@@ -78,14 +77,12 @@ export function Header() {
             <Phone size={18} />
           </a>
           <a
-            href={orderLink}
-            target="_blank"
-            rel="noreferrer"
+            href="#commande"
             className={`rounded-full bg-gold px-5 py-2.5 text-sm font-black text-ink shadow-gold transition hover:-translate-y-0.5 ${
               isDarkTheme ? "hover:bg-white" : "hover:bg-ink hover:text-white"
             }`}
           >
-            Commander sur WhatsApp
+            Préparer une livraison
           </a>
         </div>
 
@@ -113,12 +110,11 @@ export function Header() {
               </a>
             ))}
             <a
-              href={orderLink}
-              target="_blank"
-              rel="noreferrer"
+              href="#commande"
+              onClick={() => setIsOpen(false)}
               className="mt-2 rounded-full bg-gold px-5 py-3 text-center text-sm font-black text-ink"
             >
-              Commander sur WhatsApp
+              Préparer une livraison
             </a>
             <a
               href={PHONE_LINK}

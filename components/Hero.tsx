@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowRight, MapPin, ShieldCheck } from "lucide-react";
+import { ArrowRight, MapPin, PackageSearch, ShieldCheck } from "lucide-react";
 import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -70,14 +70,15 @@ export function Hero() {
               href="#commande"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-sm font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-gold hover:text-ink"
             >
-              Trouver ma livraison
+              Préparer ma livraison
               <ArrowRight size={18} />
             </a>
             <a
-              href="#packs"
-              className="inline-flex items-center justify-center rounded-full border border-ink/15 bg-white px-6 py-4 text-sm font-black text-ink transition hover:-translate-y-0.5 hover:border-gold hover:shadow-gold"
+              href="#suivi"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 bg-white px-6 py-4 text-sm font-black text-ink transition hover:-translate-y-0.5 hover:border-gold hover:shadow-gold"
             >
-              Voir nos packs
+              <PackageSearch size={18} />
+              Suivre mon colis
             </a>
           </div>
 

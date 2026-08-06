@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { track } from "@vercel/analytics";
-import { ArrowLeft, ArrowRight, Check, LocateFixed, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, LocateFixed, MessageCircle, Sparkles } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -49,6 +49,7 @@ export function OrderComposer() {
   const [locatingField, setLocatingField] = useState<"pickupMapUrl" | "destinationMapUrl" | null>(null);
   const [locationMessage, setLocationMessage] = useState("");
   const [confirmationAccepted, setConfirmationAccepted] = useState(false);
+  const [stepError, setStepError] = useState("");
   const startedRef = useRef(false);
   const sentRef = useRef(false);
   const completedTrackedRef = useRef(false);
@@ -138,8 +139,21 @@ export function OrderComposer() {
     { scope, dependencies: [step] },
   );
 
+  useGSAP(
+    () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      gsap.fromTo(
+        ".recommendation-card",
+        { scale: 0.985, y: 5 },
+        { scale: 1, y: 0, duration: 0.42, ease: "back.out(1.5)" },
+      );
+    },
+    { scope, dependencies: [recommendation.packName] },
+  );
+
   function updateOrder(field: keyof OrderMessageInput, value: string) {
     setOrder((current) => ({ ...current, [field]: value }));
+    if (stepError) setStepError("");
   }
 
   function captureLocation(field: "pickupMapUrl" | "destinationMapUrl") {
@@ -157,6 +171,7 @@ export function OrderComposer() {
         updateOrder(field, mapUrl);
         setLocationMessage("Position ajoutée au message WhatsApp.");
         setLocatingField(null);
+        navigator.vibrate?.([12, 35, 12]);
       },
       () => {
         setLocationMessage("Position non récupérée. Vous pouvez continuer avec l'adresse manuelle.");
@@ -174,10 +189,18 @@ export function OrderComposer() {
       service: selectedNeed.service,
       packName: selectedNeed.packName,
     }));
+    navigator.vibrate?.(10);
   }
 
   function nextStep() {
     startedRef.current = true;
+    if (step === 2 && !requestIsComplete) {
+      setStepError("Ajoutez votre nom, téléphone, lieu de ramassage et destination pour continuer.");
+      navigator.vibrate?.(30);
+      return;
+    }
+    setStepError("");
+    navigator.vibrate?.(10);
     setStep((current) => Math.min(current + 1, stepLabels.length - 1));
   }
 
@@ -195,7 +218,7 @@ export function OrderComposer() {
       id="commande"
       ref={scope}
       data-nav-theme="light"
-      className="bg-[#fff7df] px-4 py-16 sm:px-6 lg:px-8 lg:py-20"
+      className="scroll-mt-20 bg-[#fff7df] px-4 py-16 sm:px-6 lg:px-8 lg:py-20"
     >
       <div className="assistant-shell mx-auto max-w-7xl">
         <div className="grid gap-8 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
@@ -209,7 +232,7 @@ export function OrderComposer() {
               clair pour l'équipe.
             </p>
 
-            <div className="mt-6 rounded-2xl border border-ink/8 bg-white p-5 shadow-sm">
+            <div className="recommendation-card mt-6 rounded-2xl border border-ink/8 bg-white p-5 shadow-sm" aria-live="polite">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-neutral-500">Pack recommandé</p>
@@ -248,6 +271,14 @@ export function OrderComposer() {
                   className="h-full rounded-full bg-gold transition-all duration-300"
                   style={{ width: `${((step + 1) / stepLabels.length) * 100}%` }}
                 />
+              </div>
+              <div className="mt-3 grid grid-cols-4 gap-2" aria-hidden="true">
+                {stepLabels.map((label, index) => (
+                  <span
+                    key={label}
+                    className={`h-1 rounded-full transition-colors duration-300 ${index <= step ? "bg-gold" : "bg-ink/8"}`}
+                  />
+                ))}
               </div>
             </div>
 
@@ -340,6 +371,7 @@ export function OrderComposer() {
                       <input
                         value={order.name}
                         onChange={(event) => updateOrder("name", event.target.value)}
+                        aria-invalid={Boolean(stepError && !order.name?.trim())}
                         placeholder="Votre nom"
                         maxLength={100}
                         className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15"
@@ -350,6 +382,7 @@ export function OrderComposer() {
                       <input
                         value={order.phone}
                         onChange={(event) => updateOrder("phone", event.target.value)}
+                        aria-invalid={Boolean(stepError && !order.phone?.trim())}
                         placeholder="+243 ..."
                         type="tel"
                         inputMode="tel"
@@ -362,6 +395,7 @@ export function OrderComposer() {
                       <input
                         value={order.pickup}
                         onChange={(event) => updateOrder("pickup", event.target.value)}
+                        aria-invalid={Boolean(stepError && !order.pickup?.trim())}
                         placeholder="Adresse de ramassage"
                         maxLength={240}
                         className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15"
@@ -390,6 +424,7 @@ export function OrderComposer() {
                       <input
                         value={order.destination}
                         onChange={(event) => updateOrder("destination", event.target.value)}
+                        aria-invalid={Boolean(stepError && !order.destination?.trim())}
                         placeholder="Adresse de livraison"
                         maxLength={240}
                         className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15"
@@ -415,12 +450,27 @@ export function OrderComposer() {
                     </label>
                   </div>
                   {locationMessage ? <p className="mt-4 text-sm font-bold text-neutral-600">{locationMessage}</p> : null}
+                  {stepError ? (
+                    <p role="alert" className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+                      {stepError}
+                    </p>
+                  ) : null}
                 </div>
               ) : null}
 
               {step === 3 ? (
                 <div>
-                  <h3 className="text-2xl font-black text-ink">Votre demande est prête</h3>
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-700">
+                      <CheckCircle2 size={24} />
+                    </span>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.14em] text-green-700">Tout est prêt</p>
+                      <h3 className="mt-1 text-2xl font-black text-ink">
+                        {order.name?.trim() ? `${order.name.trim().split(/\s+/)[0]}, votre demande est prête` : "Votre demande est prête"}
+                      </h3>
+                    </div>
+                  </div>
                   <div className="mt-5 grid gap-3 sm:grid-cols-3">
                     <div className="rounded-lg bg-amberSoft p-4">
                       <p className="text-xs font-black uppercase text-neutral-500">Complétion</p>

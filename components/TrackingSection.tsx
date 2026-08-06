@@ -1,13 +1,14 @@
 "use client";
 
-import { PackageSearch, QrCode } from "lucide-react";
+import { BellRing, PackageCheck, PackageSearch, QrCode, Truck } from "lucide-react";
 import { track } from "@vercel/analytics";
 import { trackOrderAction } from "@/app/track/actions";
 import { GsapReveal } from "@/components/GsapReveal";
+import { PendingSubmitButton } from "@/components/PendingSubmitButton";
 
 export function TrackingSection() {
   return (
-    <section id="suivi" data-nav-theme="dark" className="bg-ink px-4 py-16 text-white sm:px-6 lg:px-8">
+    <section id="suivi" data-nav-theme="dark" className="scroll-mt-20 bg-ink px-4 py-16 text-white sm:px-6 lg:px-8">
       <GsapReveal className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <div>
           <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Suivi colis</p>
@@ -15,6 +16,17 @@ export function TrackingSection() {
           <p className="mt-4 max-w-xl text-sm leading-7 text-white/68">
             Entrez le code reçu par Mr. Delivery ou scannez le QR code de votre facture pour consulter l'état du colis.
           </p>
+          <div className="mt-6 flex flex-wrap gap-2 text-xs font-black">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/7 px-3 py-2">
+              <PackageCheck size={15} className="text-gold" /> Récupéré
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/7 px-3 py-2">
+              <Truck size={15} className="text-gold" /> En livraison
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/7 px-3 py-2">
+              <BellRing size={15} className="text-gold" /> Notification reçue
+            </span>
+          </div>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white p-4 text-ink shadow-soft sm:p-6">
@@ -40,12 +52,11 @@ export function TrackingSection() {
               maxLength={32}
               className="min-h-12 flex-1 rounded-lg border border-ink/10 bg-[#fffdf7] px-4 text-sm font-black uppercase outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
             />
-            <button
-              type="submit"
-              className="inline-flex min-h-12 items-center justify-center rounded-full bg-ink px-6 text-sm font-black text-white transition hover:bg-gold hover:text-ink"
-            >
-              Suivre
-            </button>
+            <PendingSubmitButton
+              idleLabel="Suivre"
+              pendingLabel="Recherche..."
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-ink px-6 text-sm font-black text-white transition hover:bg-gold hover:text-ink disabled:cursor-wait disabled:opacity-70"
+            />
           </form>
 
           <div className="mt-5 flex items-start gap-3 rounded-lg bg-[#fffdf7] p-4 text-sm leading-6 text-neutral-600">
