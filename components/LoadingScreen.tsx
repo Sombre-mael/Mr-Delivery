@@ -12,7 +12,17 @@ export function LoadingScreen() {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setIsVisible(false), 1900);
+    const storageKey = "mrd_loader_seen_v1";
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (window.sessionStorage.getItem(storageKey)) {
+      setIsVisible(false);
+      return;
+    }
+
+    window.sessionStorage.setItem(storageKey, "1");
+    const isMobile = window.matchMedia("(max-width: 640px)").matches;
+    const timer = window.setTimeout(() => setIsVisible(false), reduceMotion ? 250 : isMobile ? 1500 : 1750);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -21,7 +31,7 @@ export function LoadingScreen() {
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       if (reduceMotion) {
-        gsap.set(scope.current, { autoAlpha: 1 });
+        gsap.set(scope.current, { autoAlpha: 0 });
         return;
       }
 
@@ -69,7 +79,7 @@ export function LoadingScreen() {
           <Truck size={42} />
         </div>
         <p className="loader-title mt-5 text-sm font-black uppercase tracking-[0.24em] text-gold">Mr. Delivery</p>
-        <h1 className="loader-title mt-2 text-2xl font-black sm:text-3xl">Preparation de votre course</h1>
+        <h1 className="loader-title mt-2 text-2xl font-black sm:text-3xl">Préparation de votre course</h1>
 
         <div className="relative mt-8 h-20 overflow-hidden px-3">
           <div className="loader-road-base absolute left-3 right-3 top-1/2 h-1 -translate-y-1/2 rounded-full bg-white/12" />

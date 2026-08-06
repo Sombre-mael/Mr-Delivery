@@ -66,8 +66,12 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="mx-auto mt-10 max-w-7xl border-t border-white/10 pt-6 text-xs font-semibold text-white/45">
-        &copy; {new Date().getFullYear()} Mr. Delivery. Tous droits réservés.
+      <div className="mx-auto mt-10 flex max-w-7xl flex-col gap-3 border-t border-white/10 pt-6 text-xs font-semibold text-white/45 sm:flex-row sm:items-center sm:justify-between">
+        <span>&copy; {new Date().getFullYear()} Mr. Delivery. Tous droits réservés.</span>
+        <nav aria-label="Informations légales" className="flex flex-wrap gap-x-5 gap-y-2">
+          <a href="/confidentialite" className="transition hover:text-gold">Confidentialité</a>
+          <a href="/conditions" className="transition hover:text-gold">Conditions de service</a>
+        </nav>
       </div>
     </footer>
   );

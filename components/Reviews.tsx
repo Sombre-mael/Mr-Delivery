@@ -29,7 +29,8 @@ export function Reviews() {
               automatiquement sur le site.
             </p>
 
-            <div className="mt-7 grid gap-3">
+            <p className="mt-7 text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Exemples de retours représentatifs</p>
+            <div className="mt-3 grid gap-3">
               {sampleReviews.map((review) => (
                 <article key={review.name} className="rounded-lg border border-ink/8 bg-white p-4 shadow-sm">
                   <div className="flex items-center justify-between gap-3">

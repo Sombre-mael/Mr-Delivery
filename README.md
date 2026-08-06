@@ -84,6 +84,15 @@ NEXT_PUBLIC_APP_URL=https://mr-delivery-nine.vercel.app
 DATABASE_URL=postgresql://neondb_owner:...@ep-...pooler.../neondb?sslmode=require
 ADMIN_PASSWORD_HASH=generate-with-pnpm-hash-admin
 SESSION_SECRET=long-secret-aleatoire
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=generate-with-pnpm-push-keys
+VAPID_PRIVATE_KEY=generate-with-pnpm-push-keys
+VAPID_SUBJECT=mailto:mrdelivery004@gmail.com
+```
+
+Appliquer ensuite les migrations Neon:
+
+```powershell
+pnpm run db:migrate
 ```
 
 - `NEXT_PUBLIC_SITE_URL` sert aux images Open Graph et Twitter Card.
@@ -97,6 +106,8 @@ Générer le hash du mot de passe équipe:
 ```powershell
 pnpm hash:admin "votre-mot-de-passe"
 ```
+
+Generer les cles de notifications une seule fois avec `pnpm push:keys`, puis ajouter les trois variables VAPID dans Vercel.
 
 Copier ensuite la valeur affichée par le script dans les variables d'environnement Vercel.
 En local uniquement, `ADMIN_PASSWORD` reste accepté comme fallback de développement.
@@ -114,6 +125,9 @@ ADMIN_PASSWORD_HASH
 SESSION_SECRET
 NEXT_PUBLIC_APP_URL
 NEXT_PUBLIC_SITE_URL
+NEXT_PUBLIC_VAPID_PUBLIC_KEY
+VAPID_PRIVATE_KEY
+VAPID_SUBJECT
 ```
 
 Pour `DATABASE_URL`, copier la chaîne de connexion complète depuis Neon > Connect > Connection string. Elle doit contenir
@@ -136,6 +150,8 @@ Le projet Vercel connecté au repo GitHub redéploiera automatiquement la branch
 5. Mettre à jour le statut quand le colis est récupéré, en livraison ou livré.
 
 Le client peut suivre son colis via `/track`, avec son code, ou via le QR code de la facture.
+
+Les procédures de sauvegarde, conservation et gestion d’incident sont décrites dans `docs/operations.md`.
 
 ## Contact
 

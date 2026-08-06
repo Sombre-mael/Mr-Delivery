@@ -1,4 +1,4 @@
-import { createHmac, scryptSync, timingSafeEqual } from "crypto";
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 
 const COOKIE_NAME = "mrd_operator_session";
@@ -17,7 +17,8 @@ function getSessionSecret() {
 }
 
 function sign(payload: string) {
-  return createHmac("sha256", getSessionSecret()).update(payload).digest("hex");
+  const credentialVersion = process.env.ADMIN_PASSWORD_HASH || process.env.ADMIN_PASSWORD || "development";
+  return createHmac("sha256", getSessionSecret()).update(`${payload}.${credentialVersion}`).digest("hex");
 }
 
 function safeCompare(left: string, right: string) {
@@ -76,8 +77,8 @@ export async function isOperatorAuthenticated() {
     return false;
   }
 
-  const [timestamp, signature] = session.split(".");
-  if (!timestamp || !signature) {
+  const [timestamp, nonce, signature] = session.split(".");
+  if (!timestamp || !nonce || !signature) {
     return false;
   }
 
@@ -86,19 +87,22 @@ export async function isOperatorAuthenticated() {
     return false;
   }
 
-  return safeCompare(signature, sign(timestamp));
+  return safeCompare(signature, sign(`${timestamp}.${nonce}`));
 }
 
 export async function createOperatorSession() {
   const timestamp = String(Date.now());
+  const nonce = randomBytes(16).toString("hex");
+  const payload = `${timestamp}.${nonce}`;
   const cookieStore = await cookies();
 
-  cookieStore.set(COOKIE_NAME, `${timestamp}.${sign(timestamp)}`, {
+  cookieStore.set(COOKIE_NAME, `${payload}.${sign(payload)}`, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: "/",
+    path: "/operator",
     maxAge: SESSION_TTL_MS / 1000,
+    priority: "high",
   });
 }
 

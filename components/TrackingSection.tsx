@@ -1,4 +1,7 @@
+"use client";
+
 import { PackageSearch, QrCode } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { trackOrderAction } from "@/app/track/actions";
 import { GsapReveal } from "@/components/GsapReveal";
 
@@ -25,10 +28,16 @@ export function TrackingSection() {
             </div>
           </div>
 
-          <form action={trackOrderAction} className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <form
+            action={trackOrderAction}
+            onSubmit={() => track("tracking_search", { source: "home" })}
+            className="mt-5 flex flex-col gap-3 sm:flex-row"
+          >
             <input
               name="trackingCode"
               placeholder="Code de suivi"
+              required
+              maxLength={32}
               className="min-h-12 flex-1 rounded-lg border border-ink/10 bg-[#fffdf7] px-4 text-sm font-black uppercase outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
             />
             <button

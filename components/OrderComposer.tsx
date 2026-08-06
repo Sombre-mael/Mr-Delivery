@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { track } from "@vercel/analytics";
 import { ArrowLeft, ArrowRight, Check, LocateFixed, MessageCircle, Sparkles } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -47,6 +48,11 @@ export function OrderComposer() {
   const [order, setOrder] = useState<OrderMessageInput>(initialOrder);
   const [locatingField, setLocatingField] = useState<"pickupMapUrl" | "destinationMapUrl" | null>(null);
   const [locationMessage, setLocationMessage] = useState("");
+  const [confirmationAccepted, setConfirmationAccepted] = useState(false);
+  const startedRef = useRef(false);
+  const sentRef = useRef(false);
+  const completedTrackedRef = useRef(false);
+  const currentStepRef = useRef(0);
 
   const recommendation = useMemo(() => recommendPack(order.need, order.urgency), [order.need, order.urgency]);
   const recommendedPack = useMemo(
@@ -67,6 +73,26 @@ export function OrderComposer() {
     [order, recommendation],
   );
   const whatsappLink = useMemo(() => generateWhatsAppLink(message), [message]);
+  const requestIsComplete = Boolean(
+    order.name?.trim() && order.phone?.trim() && order.pickup?.trim() && order.destination?.trim(),
+  );
+
+  useEffect(() => {
+    currentStepRef.current = step;
+    if (step === 3 && !completedTrackedRef.current) {
+      completedTrackedRef.current = true;
+      track("order_form_completed", { pack: recommendation.packName });
+    }
+  }, [recommendation.packName, step]);
+
+  useEffect(
+    () => () => {
+      if (startedRef.current && !sentRef.current) {
+        track("order_form_abandoned", { step: String(currentStepRef.current + 1) });
+      }
+    },
+    [],
+  );
 
   useGSAP(
     () => {
@@ -151,7 +177,13 @@ export function OrderComposer() {
   }
 
   function nextStep() {
+    startedRef.current = true;
     setStep((current) => Math.min(current + 1, stepLabels.length - 1));
+  }
+
+  function handleWhatsAppClick() {
+    sentRef.current = true;
+    track("whatsapp_order_opened", { pack: recommendation.packName });
   }
 
   function previousStep() {
@@ -309,6 +341,7 @@ export function OrderComposer() {
                         value={order.name}
                         onChange={(event) => updateOrder("name", event.target.value)}
                         placeholder="Votre nom"
+                        maxLength={100}
                         className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15"
                       />
                     </label>
@@ -318,6 +351,9 @@ export function OrderComposer() {
                         value={order.phone}
                         onChange={(event) => updateOrder("phone", event.target.value)}
                         placeholder="+243 ..."
+                        type="tel"
+                        inputMode="tel"
+                        maxLength={20}
                         className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15"
                       />
                     </label>
@@ -327,6 +363,7 @@ export function OrderComposer() {
                         value={order.pickup}
                         onChange={(event) => updateOrder("pickup", event.target.value)}
                         placeholder="Adresse de ramassage"
+                        maxLength={240}
                         className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15"
                       />
                       <button
@@ -354,6 +391,7 @@ export function OrderComposer() {
                         value={order.destination}
                         onChange={(event) => updateOrder("destination", event.target.value)}
                         placeholder="Adresse de livraison"
+                        maxLength={240}
                         className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15"
                       />
                       <button
@@ -406,6 +444,20 @@ export function OrderComposer() {
                       {message}
                     </pre>
                   </div>
+                  <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-lg border border-ink/10 bg-white p-4">
+                    <input
+                      type="checkbox"
+                      checked={confirmationAccepted}
+                      onChange={(event) => setConfirmationAccepted(event.target.checked)}
+                      className="mt-1 h-5 w-5 accent-[#f4b400]"
+                    />
+                    <span className="text-sm font-semibold leading-6 text-neutral-700">
+                      Je comprends que l’envoi du message est une demande. La commande est enregistrée uniquement après confirmation du prix, du paiement et de la disponibilité par Mr. Delivery.
+                    </span>
+                  </label>
+                  {!requestIsComplete ? (
+                    <p className="mt-3 text-sm font-bold text-red-700">Ajoutez votre nom, téléphone, lieu de ramassage et destination avant l’envoi.</p>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -430,16 +482,25 @@ export function OrderComposer() {
                   Continuer
                   <ArrowRight size={17} />
                 </button>
-              ) : (
+              ) : confirmationAccepted && requestIsComplete ? (
                 <a
                   href={whatsappLink}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={handleWhatsAppClick}
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-black text-ink shadow-gold transition hover:-translate-y-0.5 hover:bg-ink hover:text-white"
                 >
                   Envoyer sur WhatsApp
                   <ArrowRight size={17} />
                 </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-full bg-neutral-200 px-6 py-3 text-sm font-black text-neutral-500"
+                >
+                  Confirmez les informations
+                </button>
               )}
             </div>
           </div>

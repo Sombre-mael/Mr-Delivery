@@ -9,6 +9,9 @@ import {
   generateWhatsAppLink,
   type DeliveryStatus,
 } from "@/lib/whatsapp";
+import { maskCustomerName, maskLocation, normalizeTrackingCode } from "@/lib/order-utils";
+import { PwaInstallGate } from "@/components/PwaInstallGate";
+import { PushNotificationManager } from "@/components/PushNotificationManager";
 
 export const dynamic = "force-dynamic";
 
@@ -55,9 +58,10 @@ type TrackingDetailPageProps = {
 
 export async function generateMetadata({ params }: TrackingDetailPageProps): Promise<Metadata> {
   const { code } = await params;
+  const displayCode = normalizeTrackingCode(code) || "Code de suivi";
 
   return {
-    title: `Suivi ${code.toUpperCase()} | Mr. Delivery`,
+    title: `Suivi ${displayCode} | Mr. Delivery`,
     description: "État de livraison Mr. Delivery.",
     robots: {
       index: false,
@@ -75,23 +79,26 @@ function formatDate(value: string) {
 
 export default async function TrackingDetailPage({ params }: TrackingDetailPageProps) {
   const { code } = await params;
-  const order = await getOrderByTrackingCode(code);
+  const normalizedCode = normalizeTrackingCode(code);
+  const displayCode = normalizedCode || code.slice(0, 32).toUpperCase();
+  const order = normalizedCode ? await getOrderByTrackingCode(normalizedCode) : null;
 
   if (!order) {
     const supportLink = generateWhatsAppLink(
       generateTrackingSupportMessage({
-        trackingCode: code.toUpperCase(),
+        trackingCode: displayCode,
         statusLabel: "Code introuvable",
       }),
     );
 
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#fffdf7] px-4 py-12 text-ink">
+        <PwaInstallGate />
         <section className="w-full max-w-lg rounded-2xl border border-ink/10 bg-white p-6 text-center shadow-soft sm:p-8">
           <AlertTriangle className="mx-auto text-gold" size={42} />
           <h1 className="mt-4 text-2xl font-black">Code introuvable</h1>
           <p className="mt-3 text-sm leading-6 text-neutral-600">
-            Nous n'avons trouvé aucune commande avec le code {code.toUpperCase()}. Vérifiez le code ou contactez Mr. Delivery.
+            Nous n'avons trouvé aucune commande avec le code {displayCode}. Vérifiez le code ou contactez Mr. Delivery.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <a
@@ -123,13 +130,14 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
       trackingCode: order.trackingCode,
       invoiceNumber: order.invoiceNumber,
       statusLabel: deliveryStatusLabels[order.status],
-      pickup: order.pickup,
-      destination: order.destination,
+      pickup: maskLocation(order.pickup),
+      destination: maskLocation(order.destination),
     }),
   );
 
   return (
     <main className="min-h-screen bg-[#fffdf7] px-4 py-8 text-ink sm:px-6 lg:px-8">
+      <PwaInstallGate />
       <section className="mx-auto max-w-5xl">
         <div className="flex flex-col gap-4 border-b border-ink/10 pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -164,6 +172,8 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
             </a>
           </div>
         </div>
+
+        <PushNotificationManager trackingCode={order.trackingCode} />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="rounded-2xl border border-ink/8 bg-ink p-5 text-white shadow-soft sm:p-6">
@@ -202,7 +212,7 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
             <div className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Client</span>
-                <span className="mt-1 block font-bold">{order.customerName || "À confirmer"}</span>
+                <span className="mt-1 block font-bold">{order.customerName ? maskCustomerName(order.customerName) : "À confirmer"}</span>
               </p>
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Facture</span>
@@ -230,11 +240,11 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
               </p>
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Ramassage</span>
-                <span className="mt-1 block font-bold">{order.pickup || "À confirmer"}</span>
+                <span className="mt-1 block font-bold">{maskLocation(order.pickup)}</span>
               </p>
               <p>
                 <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Livraison</span>
-                <span className="mt-1 block font-bold">{order.destination || "À confirmer"}</span>
+                <span className="mt-1 block font-bold">{maskLocation(order.destination)}</span>
               </p>
             </div>
           </div>
@@ -282,7 +292,7 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
                 <div key={event.id} className="rounded-xl bg-[#fffdf7] p-4 text-sm">
                   <p className="font-black">{deliveryStatusLabels[event.status]}</p>
                   <p className="mt-1 text-neutral-600">{formatDate(event.createdAt)}</p>
-                  {event.note ? <p className="mt-2 leading-6 text-neutral-600">{event.note}</p> : null}
+                  {event.publicNote ? <p className="mt-2 leading-6 text-neutral-600">{event.publicNote}</p> : null}
                 </div>
               ))}
             </div>

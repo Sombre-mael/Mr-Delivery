@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  Archive,
+  ArchiveRestore,
   ArrowRight,
   BarChart3,
   Clock3,
@@ -17,9 +19,9 @@ import {
   Truck,
 } from "lucide-react";
 import QRCode from "qrcode";
-import { createOrderAction, logoutAction, updateOrderAction } from "@/app/operator/actions";
+import { archiveOrderAction, createOrderAction, logoutAction, updateOrderAction } from "@/app/operator/actions";
+import { PendingSubmitButton } from "@/components/PendingSubmitButton";
 import { assistantNeeds, packageTypeOptions, packs, urgencyOptions } from "@/lib/data";
-import { createInvoiceNumber } from "@/lib/order-utils";
 import type { DeliveryOrder } from "@/lib/orders";
 import {
   deliveryStatusLabels,
@@ -30,6 +32,14 @@ import {
 } from "@/lib/whatsapp";
 
 const statusOptions = Object.entries(deliveryStatusLabels) as Array<[DeliveryStatus, string]>;
+
+function createClientInvoiceNumber() {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const bytes = new Uint8Array(3);
+  globalThis.crypto.getRandomValues(bytes);
+  const suffix = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("").toUpperCase();
+  return `MRD-${date}-${suffix}`;
+}
 const historyFilters: Array<{ label: string; value: "all" | DeliveryStatus }> = [
   { label: "Toutes", value: "all" },
   { label: "Paiement", value: "payment_pending" },
@@ -39,19 +49,21 @@ const historyFilters: Array<{ label: string; value: "all" | DeliveryStatus }> = 
   { label: "Problème", value: "issue" },
 ];
 
-type OperatorForm = StatusMessageInput & {
+type OperatorForm = Omit<StatusMessageInput, "notes"> & {
   service: string;
   need: string;
   urgency: string;
   pickupMapUrl: string;
   destinationMapUrl: string;
   packageType: string;
+  internalNotes: string;
+  publicNote: string;
 };
 
 const emptyOrder: OperatorForm = {
   customerName: "",
   customerPhone: "",
-  invoiceNumber: createInvoiceNumber(),
+  invoiceNumber: "",
   service: assistantNeeds[0].service,
   need: assistantNeeds[0].label,
   urgency: urgencyOptions[0].label,
@@ -63,7 +75,8 @@ const emptyOrder: OperatorForm = {
   pickupMapUrl: "",
   destinationMapUrl: "",
   packageType: packageTypeOptions[0],
-  notes: "",
+  internalNotes: "",
+  publicNote: "",
   status: "payment_pending",
 };
 
@@ -83,7 +96,8 @@ function orderToForm(order: DeliveryOrder): OperatorForm {
     pickupMapUrl: order.pickupMapUrl,
     destinationMapUrl: order.destinationMapUrl,
     packageType: order.packageType || packageTypeOptions[0],
-    notes: order.notes,
+    internalNotes: order.internalNotes,
+    publicNote: order.publicNote,
     status: order.status,
   };
 }
@@ -113,9 +127,11 @@ type OperatorConsoleProps = {
   orders: DeliveryOrder[];
   selectedTrackingCode?: string;
   appUrl: string;
+  errorMessage?: string;
+  savedState?: string;
 };
 
-export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: OperatorConsoleProps) {
+export function OperatorConsole({ orders, selectedTrackingCode, appUrl, errorMessage, savedState }: OperatorConsoleProps) {
   const selectedOrder =
     orders.find((order) => order.trackingCode === selectedTrackingCode) ||
     orders[0] ||
@@ -126,53 +142,56 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [historyQuery, setHistoryQuery] = useState("");
   const [historyStatus, setHistoryStatus] = useState<"all" | DeliveryStatus>("all");
+  const [historyScope, setHistoryScope] = useState<"active" | "archived">("active");
 
   const trackingCode = activeOrder?.trackingCode || "À créer";
   const trackingUrl = activeOrder ? `${appUrl.replace(/\/$/, "")}/track/${activeOrder.trackingCode}` : `${appUrl.replace(/\/$/, "")}/track`;
-  const statusMessage = useMemo(() => generateStatusMessage(form), [form]);
+  const statusMessage = useMemo(() => generateStatusMessage({ ...form, notes: form.publicNote }), [form]);
   const clientWhatsAppLink = useMemo(
     () => generateClientWhatsAppLink(form.customerPhone, `${statusMessage}\n\nSuivi colis : ${trackingUrl}`),
     [form.customerPhone, statusMessage, trackingUrl],
   );
   const invoicePayload = useMemo(() => buildInvoicePayload(form, trackingCode, trackingUrl), [form, trackingCode, trackingUrl]);
+  const activeOrders = useMemo(() => orders.filter((order) => !order.archivedAt), [orders]);
   const dashboardStats = useMemo(
     () => [
       {
         label: "Commandes",
-        value: orders.length,
-        detail: "Total enregistré",
+        value: activeOrders.length,
+        detail: "Commandes actives",
         icon: BarChart3,
         tone: "bg-ink text-white",
       },
       {
         label: "Paiement attendu",
-        value: orders.filter((order) => order.status === "payment_pending").length,
+        value: activeOrders.filter((order) => order.status === "payment_pending").length,
         detail: "À confirmer",
         icon: Clock3,
         tone: "bg-gold text-ink",
       },
       {
         label: "En livraison",
-        value: orders.filter((order) => order.status === "in_delivery").length,
+        value: activeOrders.filter((order) => order.status === "in_delivery").length,
         detail: "Courses actives",
         icon: Truck,
         tone: "bg-ink text-gold",
       },
       {
         label: "Livrées",
-        value: orders.filter((order) => order.status === "delivered").length,
+        value: activeOrders.filter((order) => order.status === "delivered").length,
         detail: "Terminées",
         icon: PackageCheck,
         tone: "bg-white text-ink",
       },
     ],
-    [orders],
+    [activeOrders],
   );
   const filteredOrders = useMemo(() => {
     const query = historyQuery.trim().toLowerCase();
 
     return orders.filter((order) => {
       const matchesStatus = historyStatus === "all" || order.status === historyStatus;
+      const matchesScope = historyScope === "archived" ? Boolean(order.archivedAt) : !order.archivedAt;
       const haystack = [
         order.customerName,
         order.customerPhone,
@@ -185,9 +204,9 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
         .join(" ")
         .toLowerCase();
 
-      return matchesStatus && (!query || haystack.includes(query));
+      return matchesScope && matchesStatus && (!query || haystack.includes(query));
     });
-  }, [historyQuery, historyStatus, orders]);
+  }, [historyQuery, historyScope, historyStatus, orders]);
 
   useEffect(() => {
     if (activeOrder) {
@@ -195,7 +214,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
       return;
     }
 
-    setForm({ ...emptyOrder, invoiceNumber: createInvoiceNumber() });
+    setForm({ ...emptyOrder, invoiceNumber: createClientInvoiceNumber() });
   }, [activeOrder]);
 
   useEffect(() => {
@@ -232,7 +251,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
 
   function startNewOrder() {
     setActiveOrderId("");
-    setForm({ ...emptyOrder, invoiceNumber: createInvoiceNumber() });
+    setForm({ ...emptyOrder, invoiceNumber: createClientInvoiceNumber() });
   }
 
   function printInvoice() {
@@ -242,6 +261,20 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
   return (
     <main className="min-h-screen bg-[#fffdf7] px-4 py-8 text-ink sm:px-6 lg:px-8 print:bg-white print:px-0 print:py-0">
       <section className="mx-auto max-w-7xl print:hidden">
+        {errorMessage ? (
+          <div role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+            {errorMessage === "save" ? "La commande n’a pas pu être enregistrée. Réessayez." : errorMessage}
+          </div>
+        ) : null}
+        {savedState ? (
+          <div role="status" className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-bold text-green-800">
+            {savedState === "archived"
+              ? "Commande archivée."
+              : savedState === "restored"
+                ? "Commande restaurée."
+                : "Commande enregistrée avec succès."}
+          </div>
+        ) : null}
         <div className="flex flex-col gap-4 border-b border-ink/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Console équipe</p>
@@ -295,7 +328,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-black">Commandes</h2>
-                <p className="text-sm text-neutral-600">{orders.length} commande(s) récentes</p>
+                <p className="text-sm text-neutral-600">{activeOrders.length} commande(s) actives</p>
               </div>
               <button
                 type="button"
@@ -307,8 +340,8 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
             </div>
 
             <div className="mt-5 space-y-3">
-              {orders.length ? (
-                orders.map((order) => (
+              {activeOrders.length ? (
+                activeOrders.map((order) => (
                   <button
                     key={order.id}
                     type="button"
@@ -338,6 +371,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
               className="rounded-2xl border border-ink/8 bg-white p-4 shadow-soft sm:p-6"
             >
               {activeOrder ? <input type="hidden" name="orderId" value={activeOrder.id} /> : null}
+              {activeOrder ? <input type="hidden" name="trackingCode" value={activeOrder.trackingCode} /> : null}
 
               <div className="flex items-center gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gold text-ink">
@@ -359,6 +393,8 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                     value={form.customerName}
                     onChange={(event) => updateForm("customerName", event.target.value)}
                     placeholder="Nom du client"
+                    required
+                    maxLength={100}
                     className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                   />
                 </label>
@@ -370,6 +406,9 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                     value={form.customerPhone}
                     onChange={(event) => updateForm("customerPhone", event.target.value)}
                     placeholder="+243 ..."
+                    required
+                    inputMode="tel"
+                    maxLength={20}
                     className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                   />
                 </label>
@@ -381,11 +420,12 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                       name="invoiceNumber"
                       value={form.invoiceNumber}
                       onChange={(event) => updateForm("invoiceNumber", event.target.value)}
+                      maxLength={60}
                       className="min-w-0 flex-1 rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                     />
                     <button
                       type="button"
-                      onClick={() => updateForm("invoiceNumber", createInvoiceNumber())}
+                      onClick={() => updateForm("invoiceNumber", createClientInvoiceNumber())}
                       className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-ink text-white transition hover:bg-gold hover:text-ink"
                       aria-label="Régénérer le numéro de facture"
                     >
@@ -481,6 +521,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                     value={form.amount}
                     onChange={(event) => updateForm("amount", event.target.value)}
                     placeholder="Ex: 7 500 FC"
+                    maxLength={40}
                     className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                   />
                 </label>
@@ -506,6 +547,8 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                     value={form.pickup}
                     onChange={(event) => updateForm("pickup", event.target.value)}
                     placeholder="Lieu de ramassage"
+                    required
+                    maxLength={240}
                     className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                   />
                 </label>
@@ -517,6 +560,8 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                     value={form.destination}
                     onChange={(event) => updateForm("destination", event.target.value)}
                     placeholder="Lieu de livraison"
+                    required
+                    maxLength={240}
                     className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                   />
                 </label>
@@ -528,6 +573,8 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                     value={form.pickupMapUrl}
                     onChange={(event) => updateForm("pickupMapUrl", event.target.value)}
                     placeholder="Lien Google Maps"
+                    type="url"
+                    maxLength={500}
                     className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                   />
                 </label>
@@ -539,6 +586,8 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                     value={form.destinationMapUrl}
                     onChange={(event) => updateForm("destinationMapUrl", event.target.value)}
                     placeholder="Lien Google Maps"
+                    type="url"
+                    maxLength={500}
                     className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                   />
                 </label>
@@ -560,26 +609,50 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
                 </label>
 
                 <label className="block sm:col-span-2">
-                  <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Notes</span>
+                  <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Note visible par le client</span>
                   <textarea
-                    name="notes"
-                    value={form.notes}
-                    onChange={(event) => updateForm("notes", event.target.value)}
-                    placeholder="Ex: référence paiement, livreur assigné, retard..."
-                    rows={4}
+                    name="publicNote"
+                    value={form.publicNote}
+                    onChange={(event) => updateForm("publicNote", event.target.value)}
+                    placeholder="Ex: arrivée estimée à 14h30. N’ajoutez aucune référence de paiement."
+                    rows={3}
+                    maxLength={500}
                     className="mt-2 w-full resize-none rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                   />
                 </label>
+
+                <label className="block sm:col-span-2">
+                  <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Notes internes équipe</span>
+                  <textarea
+                    name="internalNotes"
+                    value={form.internalNotes}
+                    onChange={(event) => updateForm("internalNotes", event.target.value)}
+                    placeholder="Référence paiement, livreur assigné, incident interne..."
+                    rows={4}
+                    maxLength={1000}
+                    className="mt-2 w-full resize-none rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
+                  />
+                  <span className="mt-2 block text-xs font-semibold text-neutral-500">Ce contenu n’apparaît jamais sur le suivi client.</span>
+                </label>
               </div>
 
-              <button
-                type="submit"
-                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-sm font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-gold hover:text-ink"
-              >
-                {activeOrder ? "Enregistrer les modifications" : "Créer la commande"}
-                <ArrowRight size={18} />
-              </button>
+              <PendingSubmitButton
+                idleLabel={activeOrder ? "Enregistrer les modifications" : "Créer la commande"}
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-sm font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-gold hover:text-ink disabled:cursor-wait disabled:opacity-60"
+              />
             </form>
+
+            {activeOrder && (activeOrder.status === "delivered" || activeOrder.archivedAt) ? (
+              <form action={archiveOrderAction} className="lg:col-span-2">
+                <input type="hidden" name="orderId" value={activeOrder.id} />
+                <input type="hidden" name="archived" value={activeOrder.archivedAt ? "false" : "true"} />
+                <PendingSubmitButton
+                  idleLabel={activeOrder.archivedAt ? "Restaurer la commande" : "Archiver la commande livrée"}
+                  pendingLabel="Mise à jour..."
+                  className="inline-flex w-full items-center justify-center rounded-full border border-ink/10 bg-white px-6 py-3 text-sm font-black transition hover:border-gold disabled:cursor-wait disabled:opacity-60"
+                />
+              </form>
+            ) : null}
 
             <div className="space-y-6">
               <div className="rounded-2xl border border-ink/8 bg-white p-4 shadow-soft sm:p-6">
@@ -657,7 +730,7 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
               <h2 className="mt-1 text-2xl font-black">Toutes les commandes passées</h2>
             </div>
             <p className="text-sm font-bold text-neutral-500">
-              {filteredOrders.length} / {orders.length} commande(s)
+              {filteredOrders.length} résultat(s)
             </p>
           </div>
 
@@ -672,6 +745,25 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl }: Operat
               />
             </label>
             <div className="flex gap-2 overflow-x-auto pb-1">
+              <button
+                type="button"
+                onClick={() => setHistoryScope("active")}
+                className={`shrink-0 rounded-full px-4 py-2 text-xs font-black transition ${
+                  historyScope === "active" ? "bg-gold text-ink" : "border border-ink/10 bg-white text-ink"
+                }`}
+              >
+                Actives
+              </button>
+              <button
+                type="button"
+                onClick={() => setHistoryScope("archived")}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-black transition ${
+                  historyScope === "archived" ? "bg-gold text-ink" : "border border-ink/10 bg-white text-ink"
+                }`}
+              >
+                {historyScope === "archived" ? <ArchiveRestore size={14} /> : <Archive size={14} />}
+                Archives
+              </button>
               {historyFilters.map((filter) => (
                 <button
                   key={filter.value}

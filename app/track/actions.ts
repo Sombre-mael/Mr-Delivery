@@ -1,14 +1,18 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { normalizeTrackingCode } from "@/lib/order-utils";
 
 export async function trackOrderAction(formData: FormData) {
-  const code = String(formData.get("trackingCode") || "")
-    .trim()
-    .toUpperCase();
+  const rawCode = String(formData.get("trackingCode") || "");
 
-  if (!code) {
+  if (!rawCode.trim()) {
     redirect("/track?error=missing");
+  }
+
+  const code = normalizeTrackingCode(rawCode);
+  if (!code) {
+    redirect("/track?error=invalid");
   }
 
   redirect(`/track/${encodeURIComponent(code)}`);

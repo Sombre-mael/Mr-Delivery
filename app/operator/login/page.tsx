@@ -25,6 +25,7 @@ export default async function OperatorLoginPage({ searchParams }: OperatorLoginP
   const params = await searchParams;
   const hasError = params?.error === "1";
   const hasConfigError = params?.error === "config";
+  const isBlocked = params?.error === "blocked";
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#fffdf7] px-4 py-12 text-ink">
@@ -68,6 +69,12 @@ export default async function OperatorLoginPage({ searchParams }: OperatorLoginP
           {hasConfigError ? (
             <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
               Configuration admin invalide. Vérifiez `ADMIN_PASSWORD_HASH` et `SESSION_SECRET` dans Vercel.
+            </p>
+          ) : null}
+
+          {isBlocked ? (
+            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+              Trop de tentatives. Réessayez dans 15 minutes.
             </p>
           ) : null}
 

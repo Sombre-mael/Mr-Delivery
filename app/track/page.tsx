@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { PackageSearch, QrCode } from "lucide-react";
 import { trackOrderAction } from "@/app/track/actions";
+import { PwaInstallGate } from "@/components/PwaInstallGate";
 
 export const metadata: Metadata = {
   title: "Suivre mon colis | Mr. Delivery",
@@ -15,9 +16,11 @@ type TrackPageProps = {
 export default async function TrackPage({ searchParams }: TrackPageProps) {
   const params = await searchParams;
   const hasError = params?.error === "missing";
+  const hasInvalidError = params?.error === "invalid";
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#fffdf7] px-4 py-12 text-ink">
+      <PwaInstallGate />
       <section className="w-full max-w-xl rounded-2xl border border-ink/10 bg-white p-6 shadow-soft sm:p-8">
         <div className="flex items-center gap-3">
           <Image
@@ -47,6 +50,8 @@ export default async function TrackPage({ searchParams }: TrackPageProps) {
             <input
               name="trackingCode"
               placeholder="MRD-ABC123"
+              required
+              maxLength={32}
               className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-black uppercase outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
             />
           </label>
@@ -54,6 +59,11 @@ export default async function TrackPage({ searchParams }: TrackPageProps) {
           {hasError ? (
             <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
               Ajoutez votre code de suivi avant de continuer.
+            </p>
+          ) : null}
+          {hasInvalidError ? (
+            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+              Le format du code de suivi est invalide.
             </p>
           ) : null}
 

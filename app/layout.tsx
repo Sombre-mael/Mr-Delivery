@@ -1,16 +1,25 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(getSiteUrl()),
   title: "Mr. Delivery | Livraison rapide à Lubumbashi",
   description:
     "Livraison express, fiable et sécurisée pour particuliers, commerces, restaurants, pharmacies et entreprises à Lubumbashi.",
   icons: {
-    icon: "/logo-mr-delivery.jpeg",
-    shortcut: "/logo-mr-delivery.jpeg",
-    apple: "/logo-mr-delivery.jpeg",
+    icon: "/icons/icon-192.png",
+    shortcut: "/icons/icon-192.png",
+    apple: "/icons/icon-192.png",
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Mr. Delivery",
+  },
+  applicationName: "Mr. Delivery",
   openGraph: {
     title: "Mr. Delivery | Livraison rapide à Lubumbashi",
     description:
@@ -43,7 +52,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }

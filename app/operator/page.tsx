@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 type OperatorPageProps = {
-  searchParams?: Promise<{ order?: string }>;
+  searchParams?: Promise<{ order?: string; error?: string; saved?: string }>;
 };
 
 async function getAppUrl() {
@@ -42,7 +42,15 @@ export default async function OperatorPage({ searchParams }: OperatorPageProps) 
   try {
     const orders = await listOrders();
 
-    return <OperatorConsole orders={orders} selectedTrackingCode={params?.order} appUrl={appUrl} />;
+    return (
+      <OperatorConsole
+        orders={orders}
+        selectedTrackingCode={params?.order}
+        appUrl={appUrl}
+        errorMessage={params?.error}
+        savedState={params?.saved}
+      />
+    );
   } catch (error) {
     console.error("Operator database configuration error", error);
 
