@@ -1,10 +1,30 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowRight, MessageCircle, Star } from "lucide-react";
+import { ArrowRight, ChevronDown, MessageCircle, Star } from "lucide-react";
 import { GsapReveal } from "@/components/GsapReveal";
 import { sampleReviews } from "@/lib/data";
 import { generateReviewMessage, generateWhatsAppLink } from "@/lib/whatsapp";
+
+function ReviewList() {
+  return (
+    <div className="grid gap-3">
+      {sampleReviews.map((review) => (
+        <article key={review.name} className="rounded-lg border border-ink/8 bg-white p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-black text-ink">{review.name}</h3>
+            <div className="flex text-gold">
+              {Array.from({ length: review.rating }).map((_, index) => (
+                <Star key={index} size={15} fill="currentColor" />
+              ))}
+            </div>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-neutral-600">{review.comment}</p>
+        </article>
+      ))}
+    </div>
+  );
+}
 
 export function Reviews() {
   const [rating, setRating] = useState(5);
@@ -29,21 +49,18 @@ export function Reviews() {
               automatiquement sur le site.
             </p>
 
-            <p className="mt-7 text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Exemples de retours représentatifs</p>
-            <div className="mt-3 grid gap-3">
-              {sampleReviews.map((review) => (
-                <article key={review.name} className="rounded-lg border border-ink/8 bg-white p-4 shadow-sm">
-                  <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-sm font-black text-ink">{review.name}</h3>
-                    <div className="flex text-gold">
-                      {Array.from({ length: review.rating }).map((_, index) => (
-                        <Star key={index} size={15} fill="currentColor" />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-neutral-600">{review.comment}</p>
-                </article>
-              ))}
+            <details className="group mt-6 rounded-lg border border-ink/8 bg-white p-4 shadow-sm lg:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-black">
+                Exemples de retours
+                <ChevronDown className="transition-transform group-open:rotate-180" size={18} />
+              </summary>
+              <div className="mt-4">
+                <ReviewList />
+              </div>
+            </details>
+            <div className="mt-7 hidden lg:block">
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Exemples de retours représentatifs</p>
+              <ReviewList />
             </div>
           </div>
         </GsapReveal>

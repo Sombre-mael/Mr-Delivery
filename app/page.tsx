@@ -19,10 +19,10 @@ export default function Home() {
       <LoadingScreen />
       <Header />
       <Hero />
-      <Services />
-      <Packs />
       <OrderComposer />
       <TrackingSection />
+      <Packs />
+      <Services />
       <HowItWorks />
       <Regulations />
       <Reviews />

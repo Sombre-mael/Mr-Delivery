@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
 import type { ElementType } from "react";
 import Image from "next/image";
-import { AlertTriangle, CheckCircle2, Clock3, Home, MessageCircle, PackageCheck, Truck } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ChevronDown,
+  Clock3,
+  Home,
+  MessageCircle,
+  PackageCheck,
+  Truck,
+} from "lucide-react";
 import { getOrderByTrackingCode, getOrderEvents } from "@/lib/orders";
 import {
   deliveryStatusLabels,
@@ -12,6 +21,7 @@ import {
 import { maskCustomerName, maskLocation, normalizeTrackingCode } from "@/lib/order-utils";
 import { PwaInstallGate } from "@/components/PwaInstallGate";
 import { PushNotificationManager } from "@/components/PushNotificationManager";
+import { TrackingExperience } from "@/components/TrackingExperience";
 
 export const dynamic = "force-dynamic";
 
@@ -19,22 +29,22 @@ const timeline: Array<{ status: DeliveryStatus; title: string; description: stri
   {
     status: "payment_pending",
     title: "Réservation",
-    description: "La demande est créée et attend la confirmation du paiement.",
+    description: "La demande attend la confirmation du paiement.",
   },
   {
     status: "payment_confirmed",
     title: "Paiement confirmé",
-    description: "La course est confirmée par l'équipe Mr. Delivery.",
+    description: "La course est confirmée par Mr. Delivery.",
   },
   {
     status: "picked_up",
     title: "Colis récupéré",
-    description: "Le colis a été pris en charge au lieu de ramassage.",
+    description: "Le colis a été pris en charge au ramassage.",
   },
   {
     status: "in_delivery",
     title: "En livraison",
-    description: "Le livreur est en route vers la destination.",
+    description: "Votre colis avance vers sa destination.",
   },
   {
     status: "delivered",
@@ -52,6 +62,15 @@ const statusIcons: Record<DeliveryStatus, ElementType> = {
   issue: AlertTriangle,
 };
 
+const statusDescriptions: Record<DeliveryStatus, string> = {
+  payment_pending: "Votre réservation est bien reçue. Nous attendons la confirmation du paiement.",
+  payment_confirmed: "Tout est confirmé. L'équipe prépare maintenant la prise en charge du colis.",
+  picked_up: "Bonne nouvelle, votre colis est entre les mains de Mr. Delivery.",
+  in_delivery: "Votre colis est en route. Vous serez averti dès son arrivée.",
+  delivered: "Mission accomplie, votre colis est arrivé à destination.",
+  issue: "Un point demande votre attention. L'équipe vous contactera pour le résoudre rapidement.",
+};
+
 type TrackingDetailPageProps = {
   params: Promise<{ code: string }>;
 };
@@ -63,10 +82,7 @@ export async function generateMetadata({ params }: TrackingDetailPageProps): Pro
   return {
     title: `Suivi ${displayCode} | Mr. Delivery`,
     description: "État de livraison Mr. Delivery.",
-    robots: {
-      index: false,
-      follow: false,
-    },
+    robots: { index: false, follow: false },
   };
 }
 
@@ -85,45 +101,44 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
 
   if (!order) {
     const supportLink = generateWhatsAppLink(
-      generateTrackingSupportMessage({
-        trackingCode: displayCode,
-        statusLabel: "Code introuvable",
-      }),
+      generateTrackingSupportMessage({ trackingCode: displayCode, statusLabel: "Code introuvable" }),
     );
 
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#fffdf7] px-4 py-12 text-ink">
         <PwaInstallGate />
-        <section className="w-full max-w-lg rounded-2xl border border-ink/10 bg-white p-6 text-center shadow-soft sm:p-8">
-          <AlertTriangle className="mx-auto text-gold" size={42} />
-          <h1 className="mt-4 text-2xl font-black">Code introuvable</h1>
-          <p className="mt-3 text-sm leading-6 text-neutral-600">
-            Nous n'avons trouvé aucune commande avec le code {displayCode}. Vérifiez le code ou contactez Mr. Delivery.
-          </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <a
-              href="/track"
-              className="inline-flex items-center justify-center rounded-full bg-ink px-6 py-3 text-sm font-black text-white transition hover:bg-gold hover:text-ink"
-            >
-              Réessayer
-            </a>
-            <a
-              href={supportLink}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-black text-ink transition hover:bg-ink hover:text-white"
-            >
-              <MessageCircle size={17} />
-              Contacter Mr. Delivery
-            </a>
-          </div>
-        </section>
+        <TrackingExperience status="issue">
+          <section className="tracking-enter w-full max-w-lg rounded-2xl border border-ink/10 bg-white p-6 text-center shadow-soft sm:p-8">
+            <span className="current-status-icon mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gold/15 text-gold">
+              <AlertTriangle size={34} />
+            </span>
+            <h1 className="mt-4 text-2xl font-black">Code introuvable</h1>
+            <p className="mt-3 text-sm leading-6 text-neutral-600">
+              Aucune commande ne correspond au code <strong>{displayCode}</strong>. Vérifiez-le ou demandez-nous de l'aide.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <a href="/track" className="inline-flex min-h-12 items-center justify-center rounded-full bg-ink px-6 py-3 text-sm font-black text-white transition hover:bg-gold hover:text-ink">
+                Réessayer
+              </a>
+              <a href={supportLink} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-black text-ink transition hover:bg-ink hover:text-white">
+                <MessageCircle size={17} />
+                Obtenir de l'aide
+              </a>
+            </div>
+          </section>
+        </TrackingExperience>
       </main>
     );
   }
 
   const events = await getOrderEvents(order.id);
-  const activeIndex = timeline.findIndex((item) => item.status === order.status);
+  const directIndex = timeline.findIndex((item) => item.status === order.status);
+  const eventIndex = events.reduce(
+    (highest, event) => Math.max(highest, timeline.findIndex((item) => item.status === event.status)),
+    0,
+  );
+  const progressIndex = directIndex >= 0 ? directIndex : eventIndex;
+  const progressPercent = (progressIndex / (timeline.length - 1)) * 100;
   const StatusIcon = statusIcons[order.status];
   const supportLink = generateWhatsAppLink(
     generateTrackingSupportMessage({
@@ -136,169 +151,140 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
   );
 
   return (
-    <main className="min-h-screen bg-[#fffdf7] px-4 py-8 text-ink sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#fffdf7] px-4 py-6 text-ink sm:px-6 sm:py-8 lg:px-8">
       <PwaInstallGate />
-      <section className="mx-auto max-w-5xl">
-        <div className="flex flex-col gap-4 border-b border-ink/10 pb-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/logo-mr-delivery.jpeg"
-              alt="Logo Mr. Delivery"
-              width={54}
-              height={54}
-              className="h-12 w-12 rounded-xl object-cover"
-            />
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.16em] text-gold">Suivi colis</p>
-              <h1 className="text-2xl font-black sm:text-3xl">{order.trackingCode}</h1>
+      <TrackingExperience status={order.status}>
+        <section className="mx-auto max-w-5xl pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          <header className="tracking-enter flex items-center justify-between gap-3 border-b border-ink/10 pb-4 sm:pb-6">
+            <div className="flex min-w-0 items-center gap-3">
+              <Image src="/logo-mr-delivery.jpeg" alt="Logo Mr. Delivery" width={54} height={54} className="h-11 w-11 shrink-0 rounded-xl object-cover sm:h-12 sm:w-12" />
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-gold sm:text-sm">Suivi colis</p>
+                <h1 className="truncate text-xl font-black sm:text-3xl">{order.trackingCode}</h1>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <a
-              href={supportLink}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-gold px-5 py-3 text-sm font-black text-ink transition hover:bg-ink hover:text-white"
-            >
-              <MessageCircle size={16} />
-              Contacter Mr. Delivery
+            <a href="/" aria-label="Retour à l'accueil" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-ink/10 bg-white transition hover:border-gold hover:text-gold">
+              <Home size={18} />
             </a>
-            <a
-              href="/"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-ink/10 px-5 py-3 text-sm font-black transition hover:border-gold"
-            >
-              <Home size={16} />
-              Site principal
-            </a>
-          </div>
-        </div>
+          </header>
 
-        <PushNotificationManager trackingCode={order.trackingCode} />
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="rounded-2xl border border-ink/8 bg-ink p-5 text-white shadow-soft sm:p-6">
-            <div className="flex items-start gap-4">
-              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gold text-ink">
+          <section className={`tracking-enter relative mt-5 overflow-hidden rounded-2xl bg-ink p-5 text-white shadow-soft sm:p-6 ${order.status === "delivered" ? "ring-2 ring-gold/45" : ""}`}>
+            {order.status === "delivered" ? <span className="delivery-celebration absolute -right-7 -top-7 h-24 w-24 rounded-full border-[18px] border-gold/15" aria-hidden="true" /> : null}
+            <div className="relative flex items-start gap-4">
+              <span className="current-status-icon flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gold text-ink">
                 <StatusIcon size={28} />
               </span>
-              <div>
-                <p className="text-sm font-black uppercase tracking-[0.16em] text-gold">État actuel</p>
-                <h2 className="mt-2 text-3xl font-black">{deliveryStatusLabels[order.status]}</h2>
-                <p className="mt-3 text-sm leading-7 text-white/70">
-                  Dernière mise à jour : {formatDate(order.updatedAt)}
-                </p>
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-gold">État actuel</p>
+                <h2 className="mt-1 text-2xl font-black sm:text-3xl">{deliveryStatusLabels[order.status]}</h2>
+                <p className="mt-2 text-sm leading-6 text-white/75">{statusDescriptions[order.status]}</p>
+                <p className="mt-3 text-xs font-bold text-white/50">Mis à jour le {formatDate(order.updatedAt)}</p>
               </div>
             </div>
-
-            {order.status === "issue" ? (
-              <div className="mt-6 rounded-xl border border-gold/30 bg-gold/10 p-4 text-sm leading-6 text-white/80">
-                Une information importante concerne cette course. L'équipe Mr. Delivery vous contactera pour clarifier.
-              </div>
-            ) : null}
-
-            <a
-              href={supportLink}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gold px-5 py-3 text-sm font-black text-ink transition hover:bg-white"
-            >
+            <a href={supportLink} target="_blank" rel="noreferrer" className="relative mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-gold px-5 py-3 text-sm font-black text-ink transition hover:bg-white sm:w-auto">
               <MessageCircle size={17} />
-              Demander une mise à jour
+              Contacter Mr. Delivery
             </a>
-          </div>
+          </section>
 
-          <div className="rounded-2xl border border-ink/8 bg-white p-5 shadow-soft sm:p-6">
-            <h2 className="text-xl font-black">Détails de la livraison</h2>
-            <div className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
-              <p>
-                <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Client</span>
-                <span className="mt-1 block font-bold">{order.customerName ? maskCustomerName(order.customerName) : "À confirmer"}</span>
-              </p>
-              <p>
-                <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Facture</span>
-                <span className="mt-1 block font-bold">{order.invoiceNumber}</span>
-              </p>
-              <p>
-                <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Pack</span>
-                <span className="mt-1 block font-bold">{order.packName || "À confirmer"}</span>
-              </p>
-              <p>
-                <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Service</span>
-                <span className="mt-1 block font-bold">{order.service || "À confirmer"}</span>
-              </p>
-              <p>
-                <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Type de colis</span>
-                <span className="mt-1 block font-bold">{order.packageType || "À confirmer"}</span>
-              </p>
-              <p>
-                <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Urgence</span>
-                <span className="mt-1 block font-bold">{order.urgency || "À confirmer"}</span>
-              </p>
-              <p>
-                <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Paiement</span>
-                <span className="mt-1 block font-bold">{order.paymentStatus || "À confirmer"}</span>
-              </p>
-              <p>
-                <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Ramassage</span>
-                <span className="mt-1 block font-bold">{maskLocation(order.pickup)}</span>
-              </p>
-              <p>
-                <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Livraison</span>
-                <span className="mt-1 block font-bold">{maskLocation(order.destination)}</span>
-              </p>
+          <PushNotificationManager trackingCode={order.trackingCode} />
+
+          <section className="tracking-enter mt-5 rounded-2xl border border-ink/8 bg-white p-5 shadow-soft sm:p-6">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-gold">Votre trajet</p>
+                <h2 className="mt-1 text-xl font-black">Progression de la livraison</h2>
+              </div>
+              <span className="text-sm font-black text-neutral-500">{progressIndex + 1}/{timeline.length}</span>
             </div>
-          </div>
-        </div>
 
-        <div className="mt-6 rounded-2xl border border-ink/8 bg-white p-5 shadow-soft sm:p-6">
-          <h2 className="text-xl font-black">Progression</h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-5">
-            {timeline.map((item, index) => {
-              const isDone = activeIndex >= index || order.status === "delivered";
-              const isCurrent = order.status === item.status;
-              const Icon = statusIcons[item.status];
+            <div className="relative mt-6 space-y-3 md:grid md:grid-cols-5 md:gap-3 md:space-y-0">
+              <span className="absolute bottom-5 left-[1.22rem] top-5 w-0.5 bg-ink/8 md:hidden" aria-hidden="true">
+                <span className="tracking-progress-line block w-full origin-top bg-gold" style={{ height: `${progressPercent}%` }} />
+              </span>
+              {timeline.map((item, index) => {
+                const isDone = progressIndex >= index || order.status === "delivered";
+                const isCurrent = order.status === item.status;
+                const Icon = statusIcons[item.status];
 
-              return (
-                <div
-                  key={item.status}
-                  className={`rounded-xl border p-4 ${
-                    isCurrent
-                      ? "border-gold bg-gold/12"
-                      : isDone
-                        ? "border-ink/10 bg-[#fffdf7]"
-                        : "border-ink/8 bg-white text-neutral-500"
-                  }`}
-                >
-                  <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                      isDone ? "bg-ink text-gold" : "bg-neutral-100 text-neutral-400"
+                return (
+                  <article
+                    key={item.status}
+                    aria-current={isCurrent ? "step" : undefined}
+                    className={`tracking-step relative flex gap-3 rounded-xl border p-3 md:block md:p-4 ${
+                      isCurrent
+                        ? "border-gold bg-gold/12 shadow-gold"
+                        : isDone
+                          ? "border-ink/10 bg-[#fffdf7]"
+                          : "border-ink/8 bg-white text-neutral-500"
                     }`}
                   >
-                    <Icon size={20} />
-                  </span>
-                  <h3 className="mt-4 text-sm font-black">{item.title}</h3>
-                  <p className="mt-2 text-xs leading-5">{item.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                    <span className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isDone ? "bg-ink text-gold" : "bg-neutral-100 text-neutral-400"}`}>
+                      <Icon size={20} />
+                    </span>
+                    <div>
+                      <h3 className="text-sm font-black md:mt-4">{item.title}</h3>
+                      <p className="mt-1 text-xs leading-5 md:mt-2">{item.description}</p>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
 
-        {events.length ? (
-          <div className="mt-6 rounded-2xl border border-ink/8 bg-white p-5 shadow-soft sm:p-6">
-            <h2 className="text-xl font-black">Historique</h2>
-            <div className="mt-5 space-y-3">
-              {events.map((event) => (
-                <div key={event.id} className="rounded-xl bg-[#fffdf7] p-4 text-sm">
-                  <p className="font-black">{deliveryStatusLabels[event.status]}</p>
-                  <p className="mt-1 text-neutral-600">{formatDate(event.createdAt)}</p>
-                  {event.publicNote ? <p className="mt-2 leading-6 text-neutral-600">{event.publicNote}</p> : null}
-                </div>
+          <details open className="group tracking-enter mt-5 rounded-2xl border border-ink/8 bg-white shadow-soft">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 sm:p-6">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-neutral-500">Informations</p>
+                <h2 className="mt-1 text-xl font-black">Détails de la livraison</h2>
+              </div>
+              <ChevronDown className="shrink-0 transition-transform group-open:rotate-180" size={21} />
+            </summary>
+            <div className="grid gap-4 border-t border-ink/8 px-5 pb-5 pt-4 text-sm sm:grid-cols-2 sm:px-6 sm:pb-6">
+              {[
+                ["Client", order.customerName ? maskCustomerName(order.customerName) : "À confirmer"],
+                ["Facture", order.invoiceNumber],
+                ["Pack", order.packName || "À confirmer"],
+                ["Service", order.service || "À confirmer"],
+                ["Type de colis", order.packageType || "À confirmer"],
+                ["Urgence", order.urgency || "À confirmer"],
+                ["Paiement", order.paymentStatus || "À confirmer"],
+                ["Ramassage", maskLocation(order.pickup)],
+                ["Livraison", maskLocation(order.destination)],
+              ].map(([label, value]) => (
+                <p key={label}>
+                  <span className="block text-xs font-black uppercase tracking-[0.12em] text-neutral-500">{label}</span>
+                  <span className="mt-1 block font-bold">{value}</span>
+                </p>
               ))}
             </div>
-          </div>
-        ) : null}
-      </section>
+          </details>
+
+          {events.length ? (
+            <details className="group tracking-enter mt-5 rounded-2xl border border-ink/8 bg-white shadow-soft">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 sm:p-6">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-neutral-500">{events.length} mise{events.length > 1 ? "s" : ""} à jour</p>
+                  <h2 className="mt-1 text-xl font-black">Historique</h2>
+                </div>
+                <ChevronDown className="shrink-0 transition-transform group-open:rotate-180" size={21} />
+              </summary>
+              <div className="space-y-3 border-t border-ink/8 px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
+                {events.map((event) => (
+                  <div key={event.id} className="flex gap-3 rounded-xl bg-[#fffdf7] p-4 text-sm">
+                    <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-gold" />
+                    <div>
+                      <p className="font-black">{deliveryStatusLabels[event.status]}</p>
+                      <p className="mt-1 text-xs text-neutral-500">{formatDate(event.createdAt)}</p>
+                      {event.publicNote ? <p className="mt-2 leading-6 text-neutral-600">{event.publicNote}</p> : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </details>
+          ) : null}
+        </section>
+      </TrackingExperience>
     </main>
   );
 }

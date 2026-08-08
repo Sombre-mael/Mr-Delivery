@@ -4,6 +4,7 @@ import { useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { motion, prefersReducedMotion } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -32,7 +33,7 @@ export function GsapReveal({
 
   useGSAP(
     () => {
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduceMotion = prefersReducedMotion();
       const select = gsap.utils.selector(scope);
       const targets = selector ? select(selector) : scope.current;
 
@@ -50,17 +51,17 @@ export function GsapReveal({
         targets,
         {
           opacity,
-          y: isMobile ? Math.min(y, 14) : y,
-          scale: isMobile ? 0.985 : 0.97,
+          y: isMobile ? Math.min(y, motion.mobile.distance) : y,
+          scale: isMobile ? 0.99 : 0.975,
         },
         {
           opacity: 1,
           y: 0,
           scale: 1,
-          duration: isMobile ? 0.92 : 0.78,
-          ease: isMobile ? "power2.out" : "power3.out",
+          duration: isMobile ? motion.duration.slow : 0.78,
+          ease: isMobile ? motion.ease.soft : motion.ease.enter,
           delay,
-          stagger: selector ? (isMobile ? Math.min(stagger, 0.055) : stagger) : 0,
+          stagger: selector ? (isMobile ? Math.min(stagger, motion.mobile.stagger) : stagger) : 0,
           immediateRender: false,
           clearProps: "opacity,transform",
           scrollTrigger: {

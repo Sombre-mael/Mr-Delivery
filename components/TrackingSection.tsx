@@ -1,10 +1,8 @@
 "use client";
 
 import { BellRing, PackageCheck, PackageSearch, QrCode, Truck } from "lucide-react";
-import { track } from "@vercel/analytics";
-import { trackOrderAction } from "@/app/track/actions";
 import { GsapReveal } from "@/components/GsapReveal";
-import { PendingSubmitButton } from "@/components/PendingSubmitButton";
+import { TrackingCodeForm } from "@/components/TrackingCodeForm";
 
 export function TrackingSection() {
   return (
@@ -40,24 +38,7 @@ export function TrackingSection() {
             </div>
           </div>
 
-          <form
-            action={trackOrderAction}
-            onSubmit={() => track("tracking_search", { source: "home" })}
-            className="mt-5 flex flex-col gap-3 sm:flex-row"
-          >
-            <input
-              name="trackingCode"
-              placeholder="Code de suivi"
-              required
-              maxLength={32}
-              className="min-h-12 flex-1 rounded-lg border border-ink/10 bg-[#fffdf7] px-4 text-sm font-black uppercase outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
-            />
-            <PendingSubmitButton
-              idleLabel="Suivre"
-              pendingLabel="Recherche..."
-              className="inline-flex min-h-12 items-center justify-center rounded-full bg-ink px-6 text-sm font-black text-white transition hover:bg-gold hover:text-ink disabled:cursor-wait disabled:opacity-70"
-            />
-          </form>
+          <div className="mt-5"><TrackingCodeForm source="home" horizontal /></div>
 
           <div className="mt-5 flex items-start gap-3 rounded-lg bg-[#fffdf7] p-4 text-sm leading-6 text-neutral-600">
             <QrCode className="mt-0.5 shrink-0 text-gold" size={20} />

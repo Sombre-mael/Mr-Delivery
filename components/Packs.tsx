@@ -59,14 +59,17 @@ export function Packs() {
           </p>
         </div>
 
-        <GsapReveal selector=".pack-card" className="mt-9 grid gap-5 lg:grid-cols-5">
+        <GsapReveal
+          selector=".pack-card"
+          className="scrollbar-none -mx-4 mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-3 sm:mx-0 sm:mt-9 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-5"
+        >
           {packs.map((pack) => {
             const link = generateWhatsAppLink(generatePackMessage(pack.name));
 
             return (
               <article
                 key={pack.name}
-                className={`pack-card relative flex min-h-[28rem] flex-col rounded-lg border p-5 shadow-sm transition hover:-translate-y-1 ${
+                className={`pack-card relative flex min-h-[27rem] w-[84vw] max-w-[21rem] shrink-0 snap-center flex-col rounded-lg border p-5 shadow-sm transition hover:-translate-y-1 sm:w-auto sm:max-w-none sm:shrink ${
                   pack.popular
                     ? "border-gold bg-ink text-white shadow-gold"
                     : "border-ink/8 bg-[#fffdf7] text-ink hover:border-gold/70"

@@ -1,7 +1,7 @@
 "use client";
 
-import { FileText, Gem, Gift, HeartPulse, Package, Shirt, Truck, Zap } from "lucide-react";
-import { useRef } from "react";
+import { ChevronDown, FileText, Gem, Gift, HeartPulse, Package, Shirt, Truck, Zap } from "lucide-react";
+import { useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { GsapReveal } from "@/components/GsapReveal";
@@ -26,6 +26,7 @@ const icons: Record<IconName, React.ComponentType<{ size?: number }>> = {
 
 export function Services() {
   const scope = useRef<HTMLElement>(null);
+  const [showAll, setShowAll] = useState(false);
 
   useGSAP(
     () => {
@@ -65,6 +66,18 @@ export function Services() {
     { scope },
   );
 
+  useGSAP(
+    () => {
+      if (!showAll || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      gsap.fromTo(
+        ".service-card-mobile-extra",
+        { autoAlpha: 0, y: 10 },
+        { autoAlpha: 1, y: 0, duration: 0.42, stagger: 0.05, ease: "power2.out", clearProps: "opacity,transform" },
+      );
+    },
+    { scope, dependencies: [showAll] },
+  );
+
   return (
     <section ref={scope} id="services" data-nav-theme="light" className="px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
       <div className="mx-auto max-w-7xl">
@@ -76,13 +89,15 @@ export function Services() {
         </div>
 
         <GsapReveal selector=".service-card" className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service) => {
+          {services.map((service, index) => {
             const Icon = icons[service.icon];
 
             return (
               <article
                 key={service.title}
-                className="service-card group rounded-lg border border-ink/8 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-gold/55 hover:shadow-gold"
+                className={`service-card group rounded-lg border border-ink/8 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-gold/55 hover:shadow-gold ${
+                  index >= 4 ? `service-card-mobile-extra ${showAll ? "block" : "hidden"} sm:block` : ""
+                }`}
               >
                 <div className="service-icon flex h-12 w-12 items-center justify-center rounded-lg bg-amberSoft text-ink transition group-hover:bg-gold">
                   <Icon size={24} />
@@ -93,6 +108,15 @@ export function Services() {
             );
           })}
         </GsapReveal>
+        <button
+          type="button"
+          onClick={() => setShowAll((value) => !value)}
+          className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-ink/10 bg-white px-5 py-3 text-sm font-black text-ink sm:hidden"
+          aria-expanded={showAll}
+        >
+          {showAll ? "Réduire les services" : "Voir tous les services"}
+          <ChevronDown className={`transition-transform ${showAll ? "rotate-180" : ""}`} size={18} />
+        </button>
       </div>
     </section>
   );

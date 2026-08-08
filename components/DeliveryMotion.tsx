@@ -3,9 +3,11 @@
 import { useRef } from "react";
 import { MapPin, Package, Truck } from "lucide-react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { prefersReducedMotion } from "@/lib/motion";
 
-gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 type DeliveryMotionProps = {
   compact?: boolean;
@@ -16,7 +18,7 @@ export function DeliveryMotion({ compact = false }: DeliveryMotionProps) {
 
   useGSAP(
     () => {
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduceMotion = prefersReducedMotion();
 
       if (reduceMotion) {
         gsap.set(".motion-route-fill, .motion-truck, .motion-pin-end, .motion-pulse, .motion-speed", {
@@ -26,7 +28,7 @@ export function DeliveryMotion({ compact = false }: DeliveryMotionProps) {
       }
 
       const isMobile = window.matchMedia("(max-width: 640px)").matches;
-      const timeline = gsap.timeline({ repeat: -1, repeatDelay: isMobile ? 0.65 : 0.42 });
+      const timeline = gsap.timeline({ paused: true, repeat: -1, repeatDelay: isMobile ? 0.8 : 0.5 });
 
       const travelDistance = () => {
         const width = scope.current?.clientWidth ?? (isMobile ? 320 : 520);
@@ -79,6 +81,21 @@ export function DeliveryMotion({ compact = false }: DeliveryMotionProps) {
         .to(".motion-pulse", { autoAlpha: 0, duration: 0.25 }, "-=0.1")
         .to(".motion-route-fill", { opacity: 0.45, duration: 0.26, ease: "sine.out" }, "+=0.04")
         .set(".motion-route-fill", { opacity: 1 });
+
+      const trigger = ScrollTrigger.create({
+        trigger: scope.current,
+        start: "top bottom",
+        end: "bottom top",
+        onEnter: () => timeline.play(),
+        onEnterBack: () => timeline.play(),
+        onLeave: () => timeline.pause(),
+        onLeaveBack: () => timeline.pause(),
+      });
+
+      return () => {
+        trigger.kill();
+        timeline.kill();
+      };
     },
     { scope },
   );

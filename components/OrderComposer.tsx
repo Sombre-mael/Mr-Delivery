@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { track } from "@vercel/analytics";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, LocateFixed, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, LocateFixed, MapPin, MessageCircle, PackageCheck, Sparkles } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { assistantNeeds, packageTypeOptions, packs, urgencyOptions } from "@/lib/data";
 import { generateCustomOrderMessage, generateMapsLink, generateWhatsAppLink, type OrderMessageInput } from "@/lib/whatsapp";
+import { triggerHaptic } from "@/lib/haptics";
+import { motion, prefersReducedMotion } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -43,7 +45,9 @@ function recommendPack(needLabel?: string, urgencyLabel?: string) {
 }
 
 export function OrderComposer() {
-  const scope = useRef<HTMLDivElement>(null);
+  const scope = useRef<HTMLElement>(null);
+  const assistantCardRef = useRef<HTMLDivElement>(null);
+  const directionRef = useRef(1);
   const [step, setStep] = useState(0);
   const [order, setOrder] = useState<OrderMessageInput>(initialOrder);
   const [locatingField, setLocatingField] = useState<"pickupMapUrl" | "destinationMapUrl" | null>(null);
@@ -97,7 +101,7 @@ export function OrderComposer() {
 
   useGSAP(
     () => {
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduceMotion = prefersReducedMotion();
 
       if (reduceMotion) {
         return;
@@ -122,7 +126,7 @@ export function OrderComposer() {
 
   useGSAP(
     () => {
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduceMotion = prefersReducedMotion();
 
       if (reduceMotion) {
         return;
@@ -130,22 +134,44 @@ export function OrderComposer() {
 
       const isMobile = window.matchMedia("(max-width: 640px)").matches;
 
+      const direction = directionRef.current;
       gsap.fromTo(
         ".assistant-step",
-        { autoAlpha: 0, x: isMobile ? 8 : 22, y: isMobile ? 6 : 0 },
-        { autoAlpha: 1, x: 0, y: 0, duration: isMobile ? 0.48 : 0.36, ease: "power2.out" },
+        { autoAlpha: 0, x: (isMobile ? 14 : 24) * direction, y: isMobile ? 4 : 0 },
+        {
+          autoAlpha: 1,
+          x: 0,
+          y: 0,
+          duration: isMobile ? motion.duration.base : 0.36,
+          ease: motion.ease.soft,
+          onComplete: () => {
+            if (startedRef.current) {
+              const heading = scope.current?.querySelector<HTMLElement>(".assistant-step h3");
+              heading?.focus({ preventScroll: true });
+            }
+          },
+        },
       );
+
+      if (step === 3) {
+        gsap.fromTo(".confirmation-route", { scaleX: 0 }, { scaleX: 1, duration: 0.65, transformOrigin: "left", ease: motion.ease.exit });
+        gsap.fromTo(
+          ".confirmation-package",
+          { x: 0, scale: 0.85 },
+          { x: () => Math.max((assistantCardRef.current?.clientWidth ?? 320) - 122, 170), scale: 1, duration: 0.72, ease: motion.ease.exit },
+        );
+      }
     },
     { scope, dependencies: [step] },
   );
 
   useGSAP(
     () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (prefersReducedMotion()) return;
       gsap.fromTo(
         ".recommendation-card",
         { scale: 0.985, y: 5 },
-        { scale: 1, y: 0, duration: 0.42, ease: "back.out(1.5)" },
+        { scale: 1, y: 0, duration: 0.42, ease: motion.ease.spring },
       );
     },
     { scope, dependencies: [recommendation.packName] },
@@ -171,7 +197,8 @@ export function OrderComposer() {
         updateOrder(field, mapUrl);
         setLocationMessage("Position ajoutée au message WhatsApp.");
         setLocatingField(null);
-        navigator.vibrate?.([12, 35, 12]);
+        triggerHaptic("success");
+        track("order_gps_added", { field: field === "pickupMapUrl" ? "pickup" : "destination" });
       },
       () => {
         setLocationMessage("Position non récupérée. Vous pouvez continuer avec l'adresse manuelle.");
@@ -189,28 +216,41 @@ export function OrderComposer() {
       service: selectedNeed.service,
       packName: selectedNeed.packName,
     }));
-    navigator.vibrate?.(10);
+    triggerHaptic("select");
   }
 
   function nextStep() {
+    if (!startedRef.current) {
+      track("assistant_journey_started", { entryStep: stepLabels[step] });
+    }
     startedRef.current = true;
     if (step === 2 && !requestIsComplete) {
       setStepError("Ajoutez votre nom, téléphone, lieu de ramassage et destination pour continuer.");
-      navigator.vibrate?.(30);
+      triggerHaptic("error");
+      if (assistantCardRef.current) {
+        gsap.fromTo(assistantCardRef.current, { x: -5 }, { x: 0, duration: 0.36, ease: "elastic.out(1, 0.35)", clearProps: "transform" });
+      }
       return;
     }
     setStepError("");
-    navigator.vibrate?.(10);
+    triggerHaptic("select");
+    track("assistant_step_completed", { step: stepLabels[step], nextStep: stepLabels[Math.min(step + 1, stepLabels.length - 1)] });
+    directionRef.current = 1;
     setStep((current) => Math.min(current + 1, stepLabels.length - 1));
+    window.setTimeout(() => assistantCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 40);
   }
 
   function handleWhatsAppClick() {
     sentRef.current = true;
+    triggerHaptic("success");
     track("whatsapp_order_opened", { pack: recommendation.packName });
   }
 
   function previousStep() {
+    directionRef.current = -1;
+    triggerHaptic("select");
     setStep((current) => Math.max(current - 1, 0));
+    window.setTimeout(() => assistantCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 40);
   }
 
   return (
@@ -218,31 +258,32 @@ export function OrderComposer() {
       id="commande"
       ref={scope}
       data-nav-theme="light"
-      className="scroll-mt-20 bg-[#fff7df] px-4 py-16 sm:px-6 lg:px-8 lg:py-20"
+      className="scroll-mt-20 bg-[#fff7df] px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20"
     >
       <div className="assistant-shell mx-auto max-w-7xl">
-        <div className="grid gap-8 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
+        <div className="grid gap-5 sm:gap-8 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
           <div className="lg:sticky lg:top-28">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Assistant livraison</p>
-            <h2 className="mt-3 text-3xl font-black leading-tight text-ink sm:text-4xl">
+            <h2 className="mt-2 text-2xl font-black leading-tight text-ink sm:mt-3 sm:text-4xl">
               Trouvez la bonne livraison avant d'écrire sur WhatsApp
             </h2>
-            <p className="mt-4 max-w-xl text-base leading-7 text-neutral-700">
+            <p className="mt-3 max-w-xl text-sm leading-6 text-neutral-700 sm:mt-4 sm:text-base sm:leading-7">
               Répondez à quelques questions. Mr. Delivery vous propose le pack le plus logique et prépare un message
               clair pour l'équipe.
             </p>
 
-            <div className="recommendation-card mt-6 rounded-2xl border border-ink/8 bg-white p-5 shadow-sm" aria-live="polite">
+            <div className="recommendation-card mt-4 rounded-xl border border-ink/8 bg-white p-4 shadow-sm sm:mt-6 sm:rounded-2xl sm:p-5" aria-live="polite">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-neutral-500">Pack recommandé</p>
-                  <h3 className="mt-2 text-2xl font-black text-ink">{recommendedPack.name}</h3>
+                  <h3 className="mt-1 text-xl font-black text-ink sm:mt-2 sm:text-2xl">{recommendedPack.name}</h3>
                 </div>
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gold text-ink">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gold text-ink sm:h-12 sm:w-12">
                   <Sparkles size={23} />
                 </span>
               </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <p className="mt-2 text-sm font-black text-ink sm:hidden">{recommendedPack.price} · {recommendedPack.delay}</p>
+              <div className="mt-4 hidden gap-3 sm:grid sm:grid-cols-2">
                 <div className="rounded-lg bg-amberSoft p-3">
                   <p className="text-xs font-black uppercase text-neutral-500">Prix</p>
                   <p className="mt-1 text-sm font-black text-ink">{recommendedPack.price}</p>
@@ -252,14 +293,14 @@ export function OrderComposer() {
                   <p className="mt-1 text-sm font-black text-ink">{recommendedPack.delay}</p>
                 </div>
               </div>
-              <p className="mt-4 text-xs font-semibold leading-5 text-neutral-500">
+              <p className="mt-3 text-xs font-semibold leading-5 text-neutral-500 sm:mt-4">
                 Recommandation indicative. L'équipe confirme toujours la disponibilité et le tarif final via WhatsApp.
               </p>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-ink/8 bg-white p-4 shadow-soft sm:p-6">
-            <div className="mb-6">
+          <div ref={assistantCardRef} className="assistant-card scroll-mt-20 rounded-2xl border border-ink/8 bg-white p-4 shadow-soft sm:p-6">
+            <div className="sticky top-[4.25rem] z-20 -mx-4 -mt-4 mb-5 border-b border-ink/6 bg-white/96 px-4 pb-3 pt-4 backdrop-blur sm:static sm:mx-0 sm:mt-0 sm:mb-6 sm:border-0 sm:bg-transparent sm:p-0">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-black text-ink">
                   Étape {step + 1} / {stepLabels.length}
@@ -282,10 +323,10 @@ export function OrderComposer() {
               </div>
             </div>
 
-            <div className="assistant-step min-h-[28rem]">
+            <div className="assistant-step min-h-0 pb-2 sm:min-h-[28rem] sm:pb-0">
               {step === 0 ? (
                 <div>
-                  <h3 className="text-2xl font-black text-ink">De quoi avez-vous besoin ?</h3>
+                  <h3 tabIndex={-1} className="text-2xl font-black text-ink outline-none">De quoi avez-vous besoin ?</h3>
                   <p className="mt-2 text-sm leading-6 text-neutral-600">
                     Choisissez le cas le plus proche. Le pack s'ajuste automatiquement.
                   </p>
@@ -298,7 +339,7 @@ export function OrderComposer() {
                           key={need.id}
                           type="button"
                           onClick={() => selectNeed(need.label)}
-                          className={`rounded-lg border p-4 text-left transition hover:-translate-y-0.5 ${
+                          className={`rounded-lg border p-3.5 text-left transition active:scale-[0.99] sm:p-4 ${
                             isSelected ? "border-gold bg-amberSoft shadow-gold" : "border-ink/8 bg-[#fffdf7] hover:border-gold/60"
                           }`}
                         >
@@ -318,7 +359,7 @@ export function OrderComposer() {
 
               {step === 1 ? (
                 <div>
-                  <h3 className="text-2xl font-black text-ink">Précisez l'urgence et le colis</h3>
+                  <h3 tabIndex={-1} className="text-2xl font-black text-ink outline-none">Précisez l'urgence et le colis</h3>
                   <div className="mt-5 grid gap-4 sm:grid-cols-2">
                     <label className="block">
                       <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Urgence</span>
@@ -364,7 +405,7 @@ export function OrderComposer() {
 
               {step === 2 ? (
                 <div>
-                  <h3 className="text-2xl font-black text-ink">Où doit-on récupérer et livrer ?</h3>
+                  <h3 tabIndex={-1} className="text-2xl font-black text-ink outline-none">Où doit-on récupérer et livrer ?</h3>
                   <div className="mt-5 grid gap-4 sm:grid-cols-2">
                     <label className="block">
                       <span className="text-xs font-black uppercase tracking-[0.12em] text-neutral-500">Nom</span>
@@ -449,7 +490,11 @@ export function OrderComposer() {
                       ) : null}
                     </label>
                   </div>
-                  {locationMessage ? <p className="mt-4 text-sm font-bold text-neutral-600">{locationMessage}</p> : null}
+                  {locationMessage ? (
+                    <p className="mt-4 flex items-center gap-2 rounded-lg bg-green-50 px-4 py-3 text-sm font-bold text-green-800" role="status">
+                      <CheckCircle2 size={18} /> {locationMessage}
+                    </p>
+                  ) : null}
                   {stepError ? (
                     <p role="alert" className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
                       {stepError}
@@ -466,10 +511,19 @@ export function OrderComposer() {
                     </span>
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.14em] text-green-700">Tout est prêt</p>
-                      <h3 className="mt-1 text-2xl font-black text-ink">
+                      <h3 tabIndex={-1} className="mt-1 text-2xl font-black text-ink outline-none">
                         {order.name?.trim() ? `${order.name.trim().split(/\s+/)[0]}, votre demande est prête` : "Votre demande est prête"}
                       </h3>
                     </div>
+                  </div>
+                  <div className="relative mt-5 h-16 overflow-hidden rounded-xl bg-[#fffdf7] px-5" aria-hidden="true">
+                    <span className="absolute left-6 right-6 top-1/2 h-1 -translate-y-1/2 rounded-full bg-ink/10" />
+                    <span className="confirmation-route absolute left-6 right-6 top-1/2 h-1 -translate-y-1/2 rounded-full bg-gold" />
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-ink" size={21} />
+                    <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 text-gold" size={21} />
+                    <span className="confirmation-package absolute left-9 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-ink text-gold shadow-soft">
+                      <PackageCheck size={18} />
+                    </span>
                   </div>
                   <div className="mt-5 grid gap-3 sm:grid-cols-3">
                     <div className="rounded-lg bg-amberSoft p-4">
@@ -498,7 +552,10 @@ export function OrderComposer() {
                     <input
                       type="checkbox"
                       checked={confirmationAccepted}
-                      onChange={(event) => setConfirmationAccepted(event.target.checked)}
+                      onChange={(event) => {
+                        setConfirmationAccepted(event.target.checked);
+                        triggerHaptic("select");
+                      }}
                       className="mt-1 h-5 w-5 accent-[#f4b400]"
                     />
                     <span className="text-sm font-semibold leading-6 text-neutral-700">
@@ -512,7 +569,7 @@ export function OrderComposer() {
               ) : null}
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="sticky bottom-[4.7rem] z-20 -mx-4 mt-5 flex flex-col gap-3 border-t border-ink/8 bg-white/96 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:border-0 sm:bg-transparent sm:p-0">
               <button
                 type="button"
                 onClick={previousStep}
