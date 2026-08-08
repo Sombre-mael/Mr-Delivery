@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Mr. Delivery",
     short_name: "Mr. Delivery",
     description: "Commandez et suivez vos livraisons Mr. Delivery.",
-    start_url: "/track",
+    start_url: "/",
     scope: "/",
     display: "standalone",
     background_color: "#fffdf7",
