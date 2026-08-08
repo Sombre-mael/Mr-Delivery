@@ -101,7 +101,7 @@ export function PwaInstallGate() {
     <div ref={scope} className="fixed inset-0 z-[120] overflow-y-auto bg-ink px-4 py-6 text-white">
       <section className="install-panel mx-auto flex min-h-full w-full max-w-md flex-col justify-center" aria-labelledby="install-title">
         <div className="flex items-center gap-3">
-          <Image src="/icons/icon-192.png" alt="Logo Mr. Delivery" width={64} height={64} priority className="h-14 w-14 rounded-xl border border-white/10 object-cover" />
+          <Image src="/icons/icon-white-192.png" alt="Logo Mr. Delivery" width={64} height={64} priority className="h-14 w-14 rounded-xl border border-white/10 object-cover" />
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-gold">Suivi mobile</p>
             <p className="mt-1 font-black">Mr. Delivery</p>

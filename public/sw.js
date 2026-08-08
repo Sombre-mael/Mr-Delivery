@@ -15,7 +15,7 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || APP_NAME, {
       body: data.body || "Votre livraison a ete mise a jour.",
-      icon: "/icons/icon-192.png",
+      icon: "/icons/icon-white-192.png",
       badge: "/icons/badge-96.png",
       tag: data.tag || "mr-delivery-status",
       renotify: true,

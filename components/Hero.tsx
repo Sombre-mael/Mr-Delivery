@@ -6,6 +6,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { DeliveryMotion } from "@/components/DeliveryMotion";
+import { DynamicHeroHeadline } from "@/components/DynamicHeroHeadline";
 import { stats } from "@/lib/data";
 
 gsap.registerPlugin(useGSAP);
@@ -78,9 +79,7 @@ export function Hero() {
             Livraison rapide à Lubumbashi
           </div>
 
-          <h1 className="mt-5 text-4xl font-black leading-[1.03] text-ink sm:mt-6 sm:text-5xl lg:text-6xl">
-            Votre temps est précieux, nous le respectons.
-          </h1>
+          <DynamicHeroHeadline />
 
           <p className="mt-4 max-w-2xl text-base leading-7 text-neutral-700 sm:mt-5 sm:text-lg sm:leading-8">
             Livraison express, fiable et sécurisée pour particuliers, commerces, restaurants, pharmacies et entreprises à

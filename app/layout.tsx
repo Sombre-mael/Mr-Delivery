@@ -10,9 +10,9 @@ export const metadata: Metadata = {
   description:
     "Livraison express, fiable et sécurisée pour particuliers, commerces, restaurants, pharmacies et entreprises à Lubumbashi.",
   icons: {
-    icon: "/icons/icon-192.png",
-    shortcut: "/icons/icon-192.png",
-    apple: "/icons/icon-192.png",
+    icon: "/icons/icon-white-192.png",
+    shortcut: "/icons/icon-white-192.png",
+    apple: "/icons/icon-white-192.png",
   },
   appleWebApp: {
     capable: true,
