@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { BellRing, Download, MapPin, MoreVertical, PackageCheck, Share2, Smartphone, Truck } from "lucide-react";
+import { BellRing, Download, LoaderCircle, MapPin, MoreVertical, PackageCheck, Share2, Smartphone, Truck } from "lucide-react";
 import { track } from "@vercel/analytics";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -31,12 +31,14 @@ export function PwaInstallGate() {
   const [isIos, setIsIos] = useState(false);
   const [promptEvent, setPromptEvent] = useState<InstallPromptEvent | null>(null);
   const [installing, setInstalling] = useState(false);
+  const [promptCheckComplete, setPromptCheckComplete] = useState(false);
 
   useEffect(() => {
     const refreshState = () => setNeedsInstall(isMobileDevice() && !isStandalone());
     const handlePrompt = (event: Event) => {
       event.preventDefault();
       setPromptEvent(event as InstallPromptEvent);
+      setPromptCheckComplete(true);
       refreshState();
       track("pwa_install_prompt_available");
     };
@@ -48,10 +50,11 @@ export function PwaInstallGate() {
 
     setIsIos(/iPhone|iPad|iPod/i.test(navigator.userAgent));
     refreshState();
-    if ("serviceWorker" in navigator) void navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    const promptTimer = window.setTimeout(() => setPromptCheckComplete(true), 2500);
     window.addEventListener("beforeinstallprompt", handlePrompt);
     window.addEventListener("appinstalled", handleInstalled);
     return () => {
+      window.clearTimeout(promptTimer);
       window.removeEventListener("beforeinstallprompt", handlePrompt);
       window.removeEventListener("appinstalled", handleInstalled);
     };
@@ -104,7 +107,7 @@ export function PwaInstallGate() {
           <Image src="/icons/icon-white-192.png" alt="Logo Mr. Delivery" width={64} height={64} priority className="h-14 w-14 rounded-xl border border-white/10 object-cover" />
           <div>
             <p className="text-xs font-black uppercase tracking-[0.16em] text-gold">Suivi mobile</p>
-            <p className="mt-1 font-black">Mr. Delivery</p>
+            <p className="mt-1 font-black">Mr Delivery</p>
           </div>
         </div>
 
@@ -136,15 +139,20 @@ export function PwaInstallGate() {
 
         {promptEvent ? (
           <button type="button" onClick={install} disabled={installing} className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-black text-ink shadow-gold transition active:scale-[0.99] disabled:cursor-wait disabled:opacity-70">
-            <Download size={19} /> {installing ? "Installation..." : "Installer Mr. Delivery"}
+            <Download size={19} /> {installing ? "Installation..." : "Installer Mr Delivery"}
           </button>
+        ) : !isIos && !promptCheckComplete ? (
+          <div className="mt-6 flex min-h-20 items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4 text-sm font-bold text-white/75" role="status">
+            <LoaderCircle className="animate-spin text-gold" size={20} />
+            Préparation de l’installation Mr Delivery...
+          </div>
         ) : (
           <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
             <p className="flex items-center gap-2 font-black text-gold"><Smartphone size={18} /> Installation en 3 étapes</p>
             <ol className="mt-3 space-y-2.5 text-sm leading-6 text-white/75">
               <li className="flex gap-3"><span className="font-black text-gold">1.</span><span className="flex items-center gap-2">Touchez {isIos ? <Share2 size={17} /> : <MoreVertical size={17} />} dans le navigateur.</span></li>
               <li className="flex gap-3"><span className="font-black text-gold">2.</span><span>Choisissez « Ajouter à l’écran d’accueil » ou « Installer ».</span></li>
-              <li className="flex gap-3"><span className="font-black text-gold">3.</span><span>Ouvrez Mr. Delivery depuis sa nouvelle icône.</span></li>
+              <li className="flex gap-3"><span className="font-black text-gold">3.</span><span>Ouvrez Mr Delivery depuis sa nouvelle icône.</span></li>
             </ol>
           </div>
         )}

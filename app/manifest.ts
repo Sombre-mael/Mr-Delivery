@@ -3,12 +3,13 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Mr. Delivery",
-    short_name: "Mr. Delivery",
+    name: "Mr Delivery",
+    short_name: "Mr Delivery",
     description: "Commandez et suivez vos livraisons Mr. Delivery.",
     start_url: "/",
     scope: "/",
     display: "standalone",
+    prefer_related_applications: false,
     background_color: "#fffdf7",
     theme_color: "#111111",
     orientation: "portrait-primary",

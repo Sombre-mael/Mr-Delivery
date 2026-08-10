@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { PwaRegistration } from "@/components/PwaRegistration";
+import { getAppVersion } from "@/lib/app-version";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -17,9 +19,9 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Mr. Delivery",
+    title: "Mr Delivery",
   },
-  applicationName: "Mr. Delivery",
+  applicationName: "Mr Delivery",
   openGraph: {
     title: "Mr. Delivery | Livraison rapide à Lubumbashi",
     description:
@@ -50,9 +52,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const appVersion = getAppVersion();
+
   return (
     <html lang="fr">
       <body>
+        <PwaRegistration currentVersion={appVersion} />
         {children}
         <Analytics />
         <SpeedInsights />
