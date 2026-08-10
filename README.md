@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/logo-mr-delivery.png" alt="Logo Mr. Delivery" width="220" />
+  <img src="public/logo-mr-delivery.jpeg" alt="Logo Mr. Delivery" width="220" />
 
   # Mr. Delivery
 
