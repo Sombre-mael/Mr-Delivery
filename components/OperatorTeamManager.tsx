@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import {
   createOperatorAction,
-  initialCredentialActionState,
   resetOperatorPasswordAction,
   toggleOperatorAction,
   updateOperatorRoleAction,
@@ -30,6 +29,8 @@ type Props = {
   errorMessage?: string;
   savedState?: string;
 };
+
+const initialCredentialActionState: CredentialActionState = { status: "idle" };
 
 const inputClass = "mt-2 min-h-12 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15";
 

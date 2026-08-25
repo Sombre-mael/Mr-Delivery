@@ -21,8 +21,6 @@ export type CredentialActionState = {
   temporaryPassword?: string;
 };
 
-export const initialCredentialActionState: CredentialActionState = { status: "idle" };
-
 function readText(formData: FormData, key: string) {
   return String(formData.get(key) || "").trim();
 }
