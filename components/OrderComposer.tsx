@@ -6,7 +6,15 @@ import { ArrowLeft, ArrowRight, Check, CheckCircle2, LocateFixed, MapPin, Messag
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { assistantNeeds, packageTypeOptions, packs, urgencyOptions } from "@/lib/data";
+import {
+  assistantNeeds,
+  packageTypeOptions,
+  packs as defaultPacks,
+  services as defaultServices,
+  urgencyOptions,
+  type Pack,
+  type Service,
+} from "@/lib/data";
 import { generateCustomOrderMessage, generateMapsLink, generateWhatsAppLink, type OrderMessageInput } from "@/lib/whatsapp";
 import { triggerHaptic } from "@/lib/haptics";
 import { motion, prefersReducedMotion } from "@/lib/motion";
@@ -44,7 +52,13 @@ function recommendPack(needLabel?: string, urgencyLabel?: string) {
   return need;
 }
 
-export function OrderComposer() {
+type OrderComposerProps = {
+  packs: Pack[];
+  services: Service[];
+  whatsappNumber: string;
+};
+
+export function OrderComposer({ packs, services, whatsappNumber }: OrderComposerProps) {
   const scope = useRef<HTMLElement>(null);
   const assistantCardRef = useRef<HTMLDivElement>(null);
   const directionRef = useRef(1);
@@ -61,8 +75,12 @@ export function OrderComposer() {
 
   const recommendation = useMemo(() => recommendPack(order.need, order.urgency), [order.need, order.urgency]);
   const recommendedPack = useMemo(
-    () => packs.find((pack) => pack.name === recommendation.packName) ?? packs[0],
-    [recommendation.packName],
+    () => packs.find((pack) => pack.id === recommendation.packId) ?? packs[0] ?? defaultPacks[0],
+    [packs, recommendation.packId],
+  );
+  const recommendedService = useMemo(
+    () => services.find((service) => service.id === recommendation.serviceId) ?? services[0] ?? defaultServices[0],
+    [recommendation.serviceId, services],
   );
   const completedFields = useMemo(
     () => [order.need, order.urgency, order.packageType, order.name, order.phone, order.pickup, order.destination].filter(Boolean).length,
@@ -72,12 +90,12 @@ export function OrderComposer() {
     () =>
       generateCustomOrderMessage({
         ...order,
-        service: recommendation.service,
-        packName: recommendation.packName,
+        service: recommendedService.title,
+        packName: recommendedPack?.name || recommendation.packName,
       }),
-    [order, recommendation],
+    [order, recommendation, recommendedPack, recommendedService.title],
   );
-  const whatsappLink = useMemo(() => generateWhatsAppLink(message), [message]);
+  const whatsappLink = useMemo(() => generateWhatsAppLink(message, whatsappNumber), [message, whatsappNumber]);
   const requestIsComplete = Boolean(
     order.name?.trim() && order.phone?.trim() && order.pickup?.trim() && order.destination?.trim(),
   );
@@ -86,9 +104,9 @@ export function OrderComposer() {
     currentStepRef.current = step;
     if (step === 3 && !completedTrackedRef.current) {
       completedTrackedRef.current = true;
-      track("order_form_completed", { pack: recommendation.packName });
+      track("order_form_completed", { pack: recommendedPack?.name || recommendation.packName });
     }
-  }, [recommendation.packName, step]);
+  }, [recommendation.packName, recommendedPack?.name, step]);
 
   useEffect(
     () => () => {
@@ -174,7 +192,7 @@ export function OrderComposer() {
         { scale: 1, y: 0, duration: 0.42, ease: motion.ease.spring },
       );
     },
-    { scope, dependencies: [recommendation.packName] },
+    { scope, dependencies: [recommendedPack?.name] },
   );
 
   function updateOrder(field: keyof OrderMessageInput, value: string) {
@@ -210,11 +228,13 @@ export function OrderComposer() {
 
   function selectNeed(label: string) {
     const selectedNeed = assistantNeeds.find((need) => need.label === label) ?? assistantNeeds[0];
+    const selectedService = services.find((service) => service.id === selectedNeed.serviceId) ?? defaultServices[0];
+    const selectedPack = packs.find((pack) => pack.id === selectedNeed.packId) ?? defaultPacks[0];
     setOrder((current) => ({
       ...current,
       need: selectedNeed.label,
-      service: selectedNeed.service,
-      packName: selectedNeed.packName,
+      service: selectedService.title,
+      packName: selectedPack.name,
     }));
     triggerHaptic("select");
   }
@@ -243,7 +263,7 @@ export function OrderComposer() {
   function handleWhatsAppClick() {
     sentRef.current = true;
     triggerHaptic("success");
-    track("whatsapp_order_opened", { pack: recommendation.packName });
+    track("whatsapp_order_opened", { pack: recommendedPack?.name || recommendation.packName });
   }
 
   function previousStep() {
@@ -532,7 +552,7 @@ export function OrderComposer() {
                     </div>
                     <div className="rounded-lg bg-amberSoft p-4">
                       <p className="text-xs font-black uppercase text-neutral-500">Pack</p>
-                      <p className="mt-1 text-sm font-black text-ink">{recommendation.packName}</p>
+                      <p className="mt-1 text-sm font-black text-ink">{recommendedPack?.name || recommendation.packName}</p>
                     </div>
                     <div className="rounded-lg bg-amberSoft p-4">
                       <p className="text-xs font-black uppercase text-neutral-500">Canal</p>

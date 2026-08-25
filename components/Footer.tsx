@@ -1,8 +1,14 @@
 import Image from "next/image";
-import { packs, services } from "@/lib/data";
-import { DISPLAY_PHONE_NUMBER, EMAIL_ADDRESS, EMAIL_LINK, PHONE_LINK } from "@/lib/whatsapp";
+import type { BusinessSettings, Pack, Service } from "@/lib/data";
+import { generatePhoneLink } from "@/lib/whatsapp";
 
-export function Footer() {
+type FooterProps = {
+  packs: Pack[];
+  services: Service[];
+  settings: BusinessSettings;
+};
+
+export function Footer({ packs, services, settings }: FooterProps) {
   return (
     <footer id="contact" data-nav-theme="dark" className="bg-ink px-4 py-12 text-white sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-9 md:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr]">
@@ -44,19 +50,19 @@ export function Footer() {
         <div>
           <h3 className="text-sm font-black uppercase tracking-[0.16em] text-gold">Contact</h3>
           <ul className="mt-4 space-y-2 text-sm text-white/68">
-            <li>Lubumbashi, RDC</li>
+            <li>{settings.locationLabel}</li>
             <li>
-              <a href={PHONE_LINK} className="transition hover:text-gold">
-                Appel normal : {DISPLAY_PHONE_NUMBER}
+              <a href={generatePhoneLink(settings.callPhoneNumber)} className="transition hover:text-gold">
+                Appel normal : {settings.displayPhoneNumber}
               </a>
             </li>
             <li>
-              <a href={EMAIL_LINK} className="transition hover:text-gold">
-                Email : {EMAIL_ADDRESS}
+              <a href={`mailto:${settings.emailAddress}`} className="transition hover:text-gold">
+                Email : {settings.emailAddress}
               </a>
             </li>
-            <li>WhatsApp Business : {DISPLAY_PHONE_NUMBER}</li>
-            <li>Disponible 7j/7 dès 7h00</li>
+            <li>WhatsApp Business : {settings.displayPhoneNumber}</li>
+            <li>{settings.businessHours}</li>
             <li>
               <a href="/operator" className="font-black text-gold transition hover:text-white">
                 Espace équipe

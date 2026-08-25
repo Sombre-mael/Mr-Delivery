@@ -4,9 +4,10 @@ import Image from "next/image";
 import { Menu, Phone, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { navLinks } from "@/lib/data";
-import { PHONE_LINK } from "@/lib/whatsapp";
+import type { BusinessSettings } from "@/lib/data";
+import { generatePhoneLink } from "@/lib/whatsapp";
 
-export function Header() {
+export function Header({ settings }: { settings: BusinessSettings }) {
   const [isOpen, setIsOpen] = useState(false);
   const [navTheme, setNavTheme] = useState<"light" | "dark">("light");
 
@@ -68,7 +69,7 @@ export function Header() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <a
-            href={PHONE_LINK}
+            href={generatePhoneLink(settings.callPhoneNumber)}
             className={`inline-flex h-10 w-10 items-center justify-center rounded-full border transition ${
               isDarkTheme ? "border-white/15 text-white hover:border-gold hover:text-gold" : "border-ink/10 text-ink hover:border-gold"
             }`}
@@ -117,7 +118,7 @@ export function Header() {
               Préparer une livraison
             </a>
             <a
-              href={PHONE_LINK}
+              href={generatePhoneLink(settings.callPhoneNumber)}
               className="rounded-full border border-ink/10 px-5 py-3 text-center text-sm font-black text-ink"
             >
               Appeler maintenant

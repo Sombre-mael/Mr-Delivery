@@ -1,79 +1,43 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { OperatorConsole } from "@/components/OperatorConsole";
-import { isOperatorAuthenticated } from "@/lib/operator-auth";
+import { OperatorDashboard } from "@/components/OperatorDashboard";
+import { OperatorShell } from "@/components/OperatorShell";
+import { requireOperatorIdentity } from "@/lib/operator-auth";
 import { listOrders } from "@/lib/orders";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
-  title: "Console opérateur | Mr. Delivery",
-  description: "Outil interne Mr. Delivery pour relances WhatsApp et factures QR.",
-  robots: {
-    index: false,
-    follow: false,
-  },
+  title: "Aperçu équipe | Mr. Delivery",
+  description: "Tableau de bord interne Mr. Delivery.",
+  robots: { index: false, follow: false },
 };
 
 type OperatorPageProps = {
-  searchParams?: Promise<{ order?: string; error?: string; saved?: string }>;
+  searchParams?: Promise<{ saved?: string }>;
 };
 
-async function getAppUrl() {
-  const headerStore = await headers();
-  const forwardedHost = headerStore.get("x-forwarded-host");
-  const host = forwardedHost || headerStore.get("host");
-  const protocol = headerStore.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
-
-  if (host) {
-    return `${protocol}://${host}`;
-  }
-
-  return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-}
-
 export default async function OperatorPage({ searchParams }: OperatorPageProps) {
-  if (!(await isOperatorAuthenticated())) {
-    redirect("/operator/login");
-  }
-
+  const identity = await requireOperatorIdentity();
   const params = await searchParams;
-  const appUrl = await getAppUrl();
 
   try {
     const orders = await listOrders();
-
     return (
-      <OperatorConsole
-        orders={orders}
-        selectedTrackingCode={params?.order}
-        appUrl={appUrl}
-        errorMessage={params?.error}
-        savedState={params?.saved}
-      />
+      <OperatorShell identity={identity}>
+        {params?.saved === "password" ? <p role="status" className="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-black text-green-800">Ton mot de passe personnel est enregistré. Ton compte est maintenant prêt.</p> : null}
+        <OperatorDashboard orders={orders} />
+      </OperatorShell>
     );
   } catch (error) {
-    console.error("Operator database configuration error", error);
-
+    console.error("Operator dashboard unavailable", error);
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#fffdf7] px-4 py-12 text-ink">
-        <section className="w-full max-w-xl rounded-2xl border border-ink/10 bg-white p-6 shadow-soft sm:p-8">
-          <p className="text-sm font-black uppercase tracking-[0.16em] text-gold">Configuration Neon</p>
-          <h1 className="mt-2 text-3xl font-black">Connexion base de données impossible</h1>
-          <p className="mt-4 text-sm leading-7 text-neutral-600">
-            Vérifiez la variable `DATABASE_URL` dans Vercel. Elle doit contenir la vraie chaîne de connexion Neon, pas le
-            modèle avec `USER`, `PASSWORD` ou `HOST`.
-          </p>
-          <div className="mt-5 rounded-lg bg-ink p-4 text-sm font-semibold leading-6 text-white/75">
-            Exemple attendu: `postgresql://neondb_owner:mot-de-passe@ep-...pooler.../neondb?sslmode=require`
-          </div>
-          <a
-            href="/"
-            className="mt-6 inline-flex rounded-full bg-gold px-6 py-3 text-sm font-black text-ink transition hover:bg-ink hover:text-white"
-          >
-            Retour au site
-          </a>
+      <OperatorShell identity={identity}>
+        <section className="rounded-lg border border-red-200 bg-white p-6">
+          <p className="text-xs font-black uppercase text-red-600">Service temporairement indisponible</p>
+          <h1 className="mt-2 text-2xl font-black">Les commandes n’ont pas pu être chargées</h1>
+          <p className="mt-3 text-sm leading-6 text-neutral-600">Le service de commandes ne répond pas pour le moment. Réessaie dans quelques instants.</p>
         </section>
-      </main>
+      </OperatorShell>
     );
   }
 }

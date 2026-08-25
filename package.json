@@ -10,7 +10,7 @@
     "start": "next start",
     "hash:admin": "node scripts/hash-admin-password.mjs",
     "push:keys": "node scripts/generate-vapid-keys.mjs",
-    "db:migrate": "node --env-file=.env.local scripts/migrate.mjs",
+    "db:migrate": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/migrate.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",

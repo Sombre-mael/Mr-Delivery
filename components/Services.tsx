@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { GsapReveal } from "@/components/GsapReveal";
-import { services, type IconName } from "@/lib/data";
+import type { IconName, Service } from "@/lib/data";
 
 gsap.registerPlugin(useGSAP);
 
@@ -24,7 +24,7 @@ const icons: Record<IconName, React.ComponentType<{ size?: number }>> = {
   mapPin: Truck,
 };
 
-export function Services() {
+export function Services({ services }: { services: Service[] }) {
   const scope = useRef<HTMLElement>(null);
   const [showAll, setShowAll] = useState(false);
 

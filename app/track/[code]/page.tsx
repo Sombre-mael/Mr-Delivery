@@ -22,6 +22,7 @@ import { maskCustomerName, maskLocation, normalizeTrackingCode } from "@/lib/ord
 import { PwaInstallGate } from "@/components/PwaInstallGate";
 import { PushNotificationManager } from "@/components/PushNotificationManager";
 import { TrackingExperience } from "@/components/TrackingExperience";
+import { getCatalogData } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -97,11 +98,15 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
   const { code } = await params;
   const normalizedCode = normalizeTrackingCode(code);
   const displayCode = normalizedCode || code.slice(0, 32).toUpperCase();
-  const order = normalizedCode ? await getOrderByTrackingCode(normalizedCode) : null;
+  const [order, catalog] = await Promise.all([
+    normalizedCode ? getOrderByTrackingCode(normalizedCode) : Promise.resolve(null),
+    getCatalogData(),
+  ]);
 
   if (!order) {
     const supportLink = generateWhatsAppLink(
       generateTrackingSupportMessage({ trackingCode: displayCode, statusLabel: "Code introuvable" }),
+      catalog.settings.whatsappNumber,
     );
 
     return (
@@ -148,6 +153,7 @@ export default async function TrackingDetailPage({ params }: TrackingDetailPageP
       pickup: maskLocation(order.pickup),
       destination: maskLocation(order.destination),
     }),
+    catalog.settings.whatsappNumber,
   );
 
   return (

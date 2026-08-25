@@ -5,12 +5,12 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { GsapReveal } from "@/components/GsapReveal";
-import { packs } from "@/lib/data";
+import type { Pack } from "@/lib/data";
 import { generatePackMessage, generateWhatsAppLink } from "@/lib/whatsapp";
 
 gsap.registerPlugin(useGSAP);
 
-export function Packs() {
+export function Packs({ packs, whatsappNumber }: { packs: Pack[]; whatsappNumber: string }) {
   const scope = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -64,7 +64,7 @@ export function Packs() {
           className="scrollbar-none -mx-4 mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-3 sm:mx-0 sm:mt-9 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-5"
         >
           {packs.map((pack) => {
-            const link = generateWhatsAppLink(generatePackMessage(pack.name));
+            const link = generateWhatsAppLink(generatePackMessage(pack.name), whatsappNumber);
 
             return (
               <article

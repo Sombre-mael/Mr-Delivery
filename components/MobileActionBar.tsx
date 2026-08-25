@@ -12,7 +12,7 @@ gsap.registerPlugin(useGSAP);
 
 type ActiveAction = "order" | "tracking";
 
-export function MobileActionBar() {
+export function MobileActionBar({ whatsappNumber }: { whatsappNumber: string }) {
   const indicatorRef = useRef<HTMLSpanElement>(null);
   const [activeAction, setActiveAction] = useState<ActiveAction>("order");
   const [keyboardOpen, setKeyboardOpen] = useState(false);
@@ -99,7 +99,7 @@ export function MobileActionBar() {
           <PackageSearch size={19} /> Suivre
         </a>
         <a
-          href={generateWhatsAppLink(generateGeneralOrderMessage())}
+          href={generateWhatsAppLink(generateGeneralOrderMessage(), whatsappNumber)}
           target="_blank"
           rel="noreferrer"
           onClick={() => {

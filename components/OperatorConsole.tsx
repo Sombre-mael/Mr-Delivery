@@ -5,23 +5,18 @@ import {
   Archive,
   ArchiveRestore,
   ArrowRight,
-  BarChart3,
-  Clock3,
   ExternalLink,
   FileText,
-  LogOut,
   MessageCircle,
-  PackageCheck,
   Printer,
   QrCode,
   RefreshCw,
   Search,
-  Truck,
 } from "lucide-react";
 import QRCode from "qrcode";
-import { archiveOrderAction, createOrderAction, logoutAction, updateOrderAction } from "@/app/operator/actions";
+import { archiveOrderAction, createOrderAction, updateOrderAction } from "@/app/operator/actions";
 import { PendingSubmitButton } from "@/components/PendingSubmitButton";
-import { assistantNeeds, packageTypeOptions, packs, urgencyOptions } from "@/lib/data";
+import { assistantNeeds, packageTypeOptions, urgencyOptions, type Pack, type Service } from "@/lib/data";
 import type { DeliveryOrder } from "@/lib/orders";
 import {
   deliveryStatusLabels,
@@ -125,14 +120,17 @@ function buildInvoicePayload(order: OperatorForm, trackingCode: string, tracking
 
 type OperatorConsoleProps = {
   orders: DeliveryOrder[];
+  packs: Pack[];
+  services: Service[];
   selectedTrackingCode?: string;
+  startWithNewOrder?: boolean;
   appUrl: string;
   errorMessage?: string;
   savedState?: string;
 };
 
-export function OperatorConsole({ orders, selectedTrackingCode, appUrl, errorMessage, savedState }: OperatorConsoleProps) {
-  const selectedOrder =
+export function OperatorConsole({ orders, packs, services, selectedTrackingCode, startWithNewOrder = false, appUrl, errorMessage, savedState }: OperatorConsoleProps) {
+  const selectedOrder = startWithNewOrder ? null :
     orders.find((order) => order.trackingCode === selectedTrackingCode) ||
     orders[0] ||
     null;
@@ -153,39 +151,6 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl, errorMes
   );
   const invoicePayload = useMemo(() => buildInvoicePayload(form, trackingCode, trackingUrl), [form, trackingCode, trackingUrl]);
   const activeOrders = useMemo(() => orders.filter((order) => !order.archivedAt), [orders]);
-  const dashboardStats = useMemo(
-    () => [
-      {
-        label: "Commandes",
-        value: activeOrders.length,
-        detail: "Commandes actives",
-        icon: BarChart3,
-        tone: "bg-ink text-white",
-      },
-      {
-        label: "Paiement attendu",
-        value: activeOrders.filter((order) => order.status === "payment_pending").length,
-        detail: "À confirmer",
-        icon: Clock3,
-        tone: "bg-gold text-ink",
-      },
-      {
-        label: "En livraison",
-        value: activeOrders.filter((order) => order.status === "in_delivery").length,
-        detail: "Courses actives",
-        icon: Truck,
-        tone: "bg-ink text-gold",
-      },
-      {
-        label: "Livrées",
-        value: activeOrders.filter((order) => order.status === "delivered").length,
-        detail: "Terminées",
-        icon: PackageCheck,
-        tone: "bg-white text-ink",
-      },
-    ],
-    [activeOrders],
-  );
   const filteredOrders = useMemo(() => {
     const query = historyQuery.trim().toLowerCase();
 
@@ -259,8 +224,8 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl, errorMes
   }
 
   return (
-    <main className="min-h-screen bg-[#fffdf7] px-4 py-8 text-ink sm:px-6 lg:px-8 print:bg-white print:px-0 print:py-0">
-      <section className="mx-auto max-w-7xl print:hidden">
+    <div className="text-ink print:bg-white">
+      <section className="print:hidden">
         {errorMessage ? (
           <div role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
             {errorMessage === "save" ? "La commande n’a pas pu être enregistrée. Réessayez." : errorMessage}
@@ -275,55 +240,16 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl, errorMes
                 : "Commande enregistrée avec succès."}
           </div>
         ) : null}
-        <div className="flex flex-col gap-4 border-b border-ink/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Console équipe</p>
-            <h1 className="mt-2 text-3xl font-black leading-tight sm:text-4xl">Commandes, suivi client et facture QR</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-600">
-              Créez une commande, changez son statut, envoyez la relance WhatsApp et donnez au client un QR de suivi.
-            </p>
+            <p className="text-xs font-black uppercase text-gold">Opérations</p>
+            <h1 className="mt-1 text-2xl font-black sm:text-3xl">Commandes et suivi client</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-600">Sélectionnez une commande ou démarrez-en une nouvelle.</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <a
-              href="/"
-              className="inline-flex items-center justify-center rounded-full border border-ink/10 px-5 py-3 text-sm font-black transition hover:border-gold"
-            >
-              Retour au site
-            </a>
-            <form action={logoutAction}>
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-black text-white transition hover:bg-gold hover:text-ink"
-              >
-                <LogOut size={16} />
-                Sortir
-              </button>
-            </form>
-          </div>
+          <button type="button" onClick={startNewOrder} className="inline-flex min-h-12 items-center justify-center rounded-full bg-gold px-5 text-sm font-black transition hover:bg-ink hover:text-white">Nouvelle commande</button>
         </div>
 
-        <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {dashboardStats.map((stat) => {
-            const Icon = stat.icon;
-
-            return (
-              <article key={stat.label} className="rounded-2xl border border-ink/8 bg-white p-4 shadow-soft">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-neutral-500">{stat.label}</p>
-                    <p className="mt-2 text-3xl font-black text-ink">{stat.value}</p>
-                    <p className="mt-1 text-sm font-semibold text-neutral-500">{stat.detail}</p>
-                  </div>
-                  <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${stat.tone}`}>
-                    <Icon size={22} />
-                  </span>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-
-        <div className="mt-8 grid gap-6 xl:grid-cols-[0.38fr_0.62fr]">
+        <div className="mt-6 grid gap-6 xl:grid-cols-[0.34fr_0.66fr]">
           <aside className="rounded-2xl border border-ink/8 bg-white p-4 shadow-soft sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -458,9 +384,9 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl, errorMes
                     onChange={(event) => updateForm("service", event.target.value)}
                     className="mt-2 w-full rounded-lg border border-ink/10 bg-[#fffdf7] px-4 py-3 text-sm font-semibold outline-none focus:border-gold focus:ring-4 focus:ring-gold/15"
                   >
-                    {Array.from(new Set(assistantNeeds.map((need) => need.service))).map((service) => (
-                      <option key={service} value={service}>
-                        {service}
+                    {services.map((service) => (
+                      <option key={service.id} value={service.title}>
+                        {service.title}
                       </option>
                     ))}
                   </select>
@@ -928,6 +854,6 @@ export function OperatorConsole({ orders, selectedTrackingCode, appUrl, errorMes
           <p className="mt-2 text-sm leading-6 text-neutral-600">{trackingUrl}</p>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

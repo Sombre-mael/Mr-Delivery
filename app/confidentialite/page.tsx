@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
-import { EMAIL_ADDRESS, EMAIL_LINK } from "@/lib/whatsapp";
+import { getCatalogData } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Politique de confidentialité | Mr. Delivery",
   description: "Utilisation et protection des données clients par Mr. Delivery.",
 };
 
-export default function PrivacyPage() {
+export const revalidate = 300;
+
+export default async function PrivacyPage() {
+  const { settings } = await getCatalogData();
   return (
     <main className="min-h-screen bg-[#fffdf7] px-4 py-12 text-ink sm:px-6 lg:px-8">
       <article className="mx-auto max-w-3xl">
@@ -34,7 +37,7 @@ export default function PrivacyPage() {
           </section>
           <section>
             <h2 className="text-xl font-black text-ink">Vos demandes</h2>
-            <p className="mt-3">Vous pouvez demander l’accès, la correction ou la suppression de vos données en indiquant votre code de suivi à <a className="font-black text-gold" href={EMAIL_LINK}>{EMAIL_ADDRESS}</a>. Une vérification d’identité pourra être demandée afin de protéger la commande.</p>
+            <p className="mt-3">Vous pouvez demander l’accès, la correction ou la suppression de vos données en indiquant votre code de suivi à <a className="font-black text-gold" href={`mailto:${settings.emailAddress}`}>{settings.emailAddress}</a>. Une vérification d’identité pourra être demandée afin de protéger la commande.</p>
           </section>
           <section>
             <h2 className="text-xl font-black text-ink">Services externes</h2>

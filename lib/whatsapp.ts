@@ -63,8 +63,16 @@ export const deliveryStatusLabels: Record<DeliveryStatus, string> = {
   issue: "Problème ou retard",
 };
 
-export function generateWhatsAppLink(message: string) {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+export function normalizeBusinessPhone(phone?: string) {
+  return (phone || WHATSAPP_NUMBER).replace(/\D/g, "") || WHATSAPP_NUMBER;
+}
+
+export function generateWhatsAppLink(message: string, whatsappNumber = WHATSAPP_NUMBER) {
+  return `https://wa.me/${normalizeBusinessPhone(whatsappNumber)}?text=${encodeURIComponent(message)}`;
+}
+
+export function generatePhoneLink(phoneNumber = WHATSAPP_NUMBER) {
+  return `tel:+${normalizeBusinessPhone(phoneNumber)}`;
 }
 
 export function normalizeWhatsAppPhone(phone?: string) {

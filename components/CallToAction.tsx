@@ -3,9 +3,10 @@
 import { ArrowRight, Check, Mail, Phone } from "lucide-react";
 import { GsapReveal } from "@/components/GsapReveal";
 import { trustArguments } from "@/lib/data";
-import { DISPLAY_PHONE_NUMBER, EMAIL_ADDRESS, EMAIL_LINK, PHONE_LINK } from "@/lib/whatsapp";
+import type { BusinessSettings } from "@/lib/data";
+import { generatePhoneLink } from "@/lib/whatsapp";
 
-export function CallToAction() {
+export function CallToAction({ settings }: { settings: BusinessSettings }) {
   return (
     <section data-nav-theme="light" className="bg-gold px-4 py-16 text-ink sm:px-6 lg:px-8">
       <GsapReveal className="mx-auto max-w-7xl">
@@ -24,18 +25,18 @@ export function CallToAction() {
                 <ArrowRight size={18} />
               </a>
               <a
-                href={PHONE_LINK}
+                href={generatePhoneLink(settings.callPhoneNumber)}
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 bg-white/80 px-6 py-4 text-sm font-black text-ink transition hover:-translate-y-0.5 hover:bg-ink hover:text-white"
               >
                 <Phone size={18} />
-                {DISPLAY_PHONE_NUMBER}
+                {settings.displayPhoneNumber}
               </a>
               <a
-                href={EMAIL_LINK}
+                href={`mailto:${settings.emailAddress}`}
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 bg-white/80 px-6 py-4 text-sm font-black text-ink transition hover:-translate-y-0.5 hover:bg-ink hover:text-white"
               >
                 <Mail size={18} />
-                {EMAIL_ADDRESS}
+                {settings.emailAddress}
               </a>
             </div>
           </div>

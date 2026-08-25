@@ -9,7 +9,7 @@ import { generateGeneralOrderMessage, generateWhatsAppLink } from "@/lib/whatsap
 
 gsap.registerPlugin(useGSAP);
 
-export function WhatsAppButton() {
+export function WhatsAppButton({ whatsappNumber }: { whatsappNumber: string }) {
   const buttonRef = useRef<HTMLAnchorElement>(null);
 
   useGSAP(() => {
@@ -28,7 +28,7 @@ export function WhatsAppButton() {
   return (
     <a
       ref={buttonRef}
-      href={generateWhatsAppLink(generateGeneralOrderMessage())}
+      href={generateWhatsAppLink(generateGeneralOrderMessage(), whatsappNumber)}
       target="_blank"
       rel="noreferrer"
       aria-label="Commander sur WhatsApp"

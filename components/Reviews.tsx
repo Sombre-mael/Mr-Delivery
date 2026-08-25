@@ -26,13 +26,13 @@ function ReviewList() {
   );
 }
 
-export function Reviews() {
+export function Reviews({ whatsappNumber }: { whatsappNumber: string }) {
   const [rating, setRating] = useState(5);
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
   const reviewLink = useMemo(
-    () => generateWhatsAppLink(generateReviewMessage({ name, rating, comment })),
-    [comment, name, rating],
+    () => generateWhatsAppLink(generateReviewMessage({ name, rating, comment }), whatsappNumber),
+    [comment, name, rating, whatsappNumber],
   );
 
   return (

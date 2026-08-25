@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
-import { DISPLAY_PHONE_NUMBER, EMAIL_ADDRESS, EMAIL_LINK, PHONE_LINK } from "@/lib/whatsapp";
+import { getCatalogData } from "@/lib/catalog";
+import { generatePhoneLink } from "@/lib/whatsapp";
 
 export const metadata: Metadata = {
   title: "Conditions de service | Mr. Delivery",
   description: "Règles de réservation, paiement et livraison Mr. Delivery.",
 };
 
-export default function TermsPage() {
+export const revalidate = 300;
+
+export default async function TermsPage() {
+  const { settings } = await getCatalogData();
   return (
     <main className="min-h-screen bg-[#fffdf7] px-4 py-12 text-ink sm:px-6 lg:px-8">
       <article className="mx-auto max-w-3xl">
@@ -21,7 +25,7 @@ export default function TermsPage() {
           <section><h2 className="text-xl font-black text-ink">Objets interdits</h2><p className="mt-3">Sont refusés les produits illégaux, armes, substances dangereuses non déclarées, espèces non autorisées, marchandises volées et tout colis dont le transport met en danger le livreur ou le public. Mr. Delivery peut demander à vérifier la nature du colis.</p></section>
           <section><h2 className="text-xl font-black text-ink">Annulation et remboursement</h2><p className="mt-3">Toute annulation doit être signalée immédiatement. Le remboursement dépend du stade de la course et des frais déjà engagés. Les conditions applicables sont confirmées par WhatsApp avant le départ du livreur.</p></section>
           <section><h2 className="text-xl font-black text-ink">Livraison et responsabilité</h2><p className="mt-3">Le destinataire doit être joignable et disponible. Les délais peuvent évoluer selon la circulation, la météo, les contrôles ou un cas de force majeure. Toute anomalie doit être signalée rapidement avec le code de suivi et, si possible, des photos.</p></section>
-          <section><h2 className="text-xl font-black text-ink">Contact et réclamation</h2><p className="mt-3">Contactez Mr. Delivery au <a className="font-black text-gold" href={PHONE_LINK}>{DISPLAY_PHONE_NUMBER}</a> ou par email à <a className="font-black text-gold" href={EMAIL_LINK}>{EMAIL_ADDRESS}</a>.</p></section>
+          <section><h2 className="text-xl font-black text-ink">Contact et réclamation</h2><p className="mt-3">Contactez Mr. Delivery au <a className="font-black text-gold" href={generatePhoneLink(settings.callPhoneNumber)}>{settings.displayPhoneNumber}</a> ou par email à <a className="font-black text-gold" href={`mailto:${settings.emailAddress}`}>{settings.emailAddress}</a>.</p></section>
         </div>
       </article>
     </main>

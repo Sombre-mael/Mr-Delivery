@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { neon } from "@neondatabase/serverless";
 
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL est manquante. Chargez .env.local avant de lancer la migration.");
+  throw new Error("DATABASE_URL est manquante. Ajoutez-la dans .env.local ou .env avant de lancer la migration.");
 }
 
 const sql = neon(process.env.DATABASE_URL);
