@@ -2,8 +2,9 @@ const PRODUCTION_URL = "https://mr-delivery-nine.vercel.app";
 
 export function getSiteUrl() {
   const configured = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL;
+  const isLocalUrl = configured ? /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configured) : false;
 
-  if (configured) {
+  if (configured && !(process.env.NODE_ENV === "production" && isLocalUrl)) {
     return configured.replace(/\/$/, "");
   }
 
